@@ -1,4 +1,5 @@
 import foodModel from "../models/foodModel.js";
+import subItemModel from "../models/subItemModel.js";
 import fs from "fs";
 
 // add food item
@@ -15,7 +16,20 @@ const addFood = async (req, res) => {
 
   try {
     await food.save();
-    res.json({ success: true, message: "Food Added" });
+    res.json({ success: true, message: "Food Added", id: food._id });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: "Error" });
+  }
+};
+
+// add food sub items
+const addSubItem = async (req, res) => {
+  const subItems = req.body.subItems; // Expecting an array of sub item objects
+
+  try {
+    await subItemModel.insertMany(subItems);
+    res.json({ success: true, message: "Sub Items Added" });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: "Error" });
@@ -49,4 +63,4 @@ const removeFood = async (req, res) => {
 
 // update food item?
 
-export { addFood, listFood, removeFood };
+export { addFood, listFood, removeFood, addSubItem };
