@@ -16,24 +16,73 @@
 }
 
 .add-product-name,
+.add-sub-item-name,
 .add-product-description {
   width: max(40%, 280px);
 }
 
 .add-product-name input,
+.add-sub-item-name input,
 .add-product-description textarea {
   padding: 10px;
 }
 
-.add-categgory-price {
+.add-categgory-price,
+.sub-product-items {
   display: flex;
   gap: 30px;
 }
 
 .add-categgory-price select,
+.sub-product-items select,
+.sub-product-items .add-price input,
 .add-categgory-price input {
   max-width: 120px;
   padding: 10px;
+}
+
+.add-sub-item {
+  border: none;
+  color: white;
+  background-color: tomato;
+  width: max(10vw, 150px);
+  margin-top: 30px;
+  padding: 10px 0px;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.add-sub-item-table {
+  width: 70%;
+  color: #6d6d6d;
+  font-size: 16px;
+}
+
+.add-sub-item-table form {
+  gap: 20px;
+}
+
+.sub-items-list-table {
+  width: 500px;
+}
+
+.sub-items-list-table-format {
+  display: grid;
+  grid-template-columns: 3fr 2fr 2fr 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 15px;
+  border: 1px solid #cacaca;
+  font-size: 13px;
+}
+
+.sub-items-table-format.title {
+  background-color: #f9f9f9;
+}
+
+.cursor {
+  cursor: pointer;
 }
 
 .add-btn {
@@ -43,4 +92,28 @@
   background-color: black;
   color: white;
   cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .sub-items-table-format {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 15px;
+  }
+
+  .sub-items-list-table-format.title {
+    display: none;
+  }
+
+  .sub-items-list-table {
+    width: 250px;
+  }
+
+  .sub-product-items {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .add-sub-item {
+    margin-top: 0px;
+  }
 }
