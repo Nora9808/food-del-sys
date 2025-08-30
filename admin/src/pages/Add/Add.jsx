@@ -11,29 +11,32 @@ const Add = ({ url }) => {
     name: "",
     description: "",
     price: "",
-    category: "",
-    subItems: [],
+    categoryId: "",
+    addons: [],
+    isAvailable: 1,
   });
-  const [subItems, setSubItems] = useState({
+  const [addons, setaddons] = useState({
     name: "",
-    category: "",
+    categoryId: "",
+    categoryName: "",
     price: "",
   });
-  const [productCategories, setProductCategoreis] = useState([]);
-  const [subItemCategories, setSubItemCategories] = useState([]);
+  const [foodCategories, setFoodCategories] = useState([]);
+  const [addonCategories, setAddonCategories] = useState([]);
 
   const fetchCategories = async () => {
     const response = await axios.get(`${url}/api/category/list`);
 
     if (response.data.success) {
       const itemCategories = response.data.data.filter(
-        (entry) => entry.type === "item"
+        (entry) => entry.type === "food"
       );
-      const subItemCategories = response.data.data.filter(
-        (entry) => entry.type === "additional"
+      const addonCategories = response.data.data.filter(
+        (entry) => entry.type === "addon"
       );
-      setProductCategoreis(itemCategories);
-      setSubItemCategories(subItemCategories);
+
+      setFoodCategories(itemCategories);
+      setAddonCategories(addonCategories);
     } else {
       toast.error("Error");
     }
@@ -45,72 +48,102 @@ const Add = ({ url }) => {
     setData((data) => ({ ...data, [name]: value }));
   };
 
-  const onSubItemsChange = (event) => {
-    const name = event.target.name;
-    const value = event.target.value;
-    setSubItems((data) => ({ ...data, [name]: value }));
+  const onAddonChange = (event) => {
+    const { name, value } = event.target;
+
+    if (name === "categoryId") {
+      // find the selected category object
+      const selectedCategory = addonCategories.find(
+        (cat) => cat.categoryId === value
+      );
+
+      setaddons((prev) => ({
+        ...prev,
+        categoryId: value,
+        categoryName: selectedCategory ? selectedCategory.name : "",
+      }));
+    } else {
+      setaddons((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
-  const addSubItem = (event) => {
+  const addNewAddon = (event) => {
     event.preventDefault();
-    let newSubItemsList = data.subItems;
-    newSubItemsList.push(subItems);
-    setData((data) => ({ ...data, subItems: newSubItemsList }));
+
+    let newaddonsList = data.addons;
+    newaddonsList.push(addons);
+    setData((data) => ({ ...data, addons: newaddonsList }));
   };
 
-  const removeSubItem = (event) => {
+  const removeAddon = (event) => {
     const indexToRemove = Number(event.target.dataset.index); // or use id if you used `id`
 
     setData((prevData) => ({
       ...prevData,
-      subItems: prevData.subItems.filter((_, i) => i !== indexToRemove),
+      addons: prevData.addons.filter((_, i) => i !== indexToRemove),
     }));
   };
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
-    const formData = new FormData();
-    formData.append("name", data.name);
-    formData.append("description", data.description);
-    formData.append("price", Number(data.price));
-    formData.append("category", data.category);
-    formData.append("image", image);
 
-    const response = await axios.post(`${url}/api/food/add`, formData);
-    if (response.data.success) {
-      addProductSubItems(response.data.id);
+    try {
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("description", data.description);
+      formData.append("price", Number(data.price));
+      formData.append("categoryId", data.categoryId);
+      formData.append("image", image);
+      formData.append("isAvailable", data.isAvailable);
+
+      const response = await axios.post(`${url}/api/food/add`, formData);
+      if (response.data.success) {
+        addProductaddons(response.data.id);
+        toast.success(response.data.message);
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (err) {
+      console.error("Error adding food:", err);
+      toast.error("Failed to add food");
+    }
+  };
+
+  const addProductaddons = async (foodId) => {
+    const preparedaddons = data.addons.map((item) => ({ ...item }));
+    console.log(preparedaddons);
+    console.log(foodId);
+
+    try {
+      for (const addon of preparedaddons) {
+        const response = await axios.post(`${url}/api/addOn/add`, {
+          foodId: foodId,
+          categoryId: addon.categoryId,
+          name: addon.name,
+          price: addon.price,
+        });
+
+        if (!response.data.success) {
+          toast.error(response.data.message);
+          return; // stop if failed
+        }
+      }
+
+      // reset only if success
       setData({
         name: "",
         description: "",
         price: "",
-        category: "",
+        categoryId: "",
+        addons: [], // 🔥 keep addons cleared
+        isAvailable: 1,
       });
-      toast.success(response.data.message);
-    } else {
-      toast.error(response.data.message);
-    }
-  };
-
-  const addProductSubItems = async (id) => {
-    const preparedSubItems = data.subItems.map((item) => ({
-      ...item,
-      productId: id,
-    }));
-
-    const response = await axios.post(`${url}/api/food/addSubItem`, {
-      subItems: preparedSubItems,
-    });
-
-    if (response.data.success) {
-      setSubItems({
-        name: "",
-        category: "",
-        price: "",
-      });
+      setaddons({ name: "", categoryId: "", categoryName: "", price: "" });
       setImage(false);
-      toast.success(response.data.message);
-    } else {
-      toast.error(response.data.message);
+      toast.success("All addons added successfully!");
+    } catch (err) {
+      console.error("Error adding addons:", err);
+      toast.error("Failed to add addons");
     }
   };
 
@@ -164,13 +197,17 @@ const Add = ({ url }) => {
         <div className="add-categgory-price">
           <div className="add-category flex-col">
             <p>Product Category</p>
-            <select onChange={onChnageHandler} name="category" defaultValue="">
+            <select
+              onChange={onChnageHandler}
+              name="categoryId"
+              defaultValue=""
+            >
               <option value="" disabled>
                 -- Select --
               </option>
-              {productCategories.map((item, index) => {
+              {foodCategories.map((item, index) => {
                 return (
-                  <option key={index} value={item.name}>
+                  <option key={index} value={item.categoryId}>
                     {item.name}
                   </option>
                 );
@@ -191,10 +228,10 @@ const Add = ({ url }) => {
 
         <div className="sub-product-items">
           <div className="add-sub-item-name flex-col">
-            <p>Sub-Item Name</p>
+            <p>Addon Name</p>
             <input
-              value={subItems.name}
-              onChange={onSubItemsChange}
+              value={addons.name}
+              onChange={onAddonChange}
               type="text"
               name="name"
               placeholder="type here"
@@ -202,14 +239,14 @@ const Add = ({ url }) => {
           </div>
 
           <div className="add-category flex-col">
-            <p>Sub-Item Category</p>
-            <select onChange={onSubItemsChange} name="category" defaultValue="">
+            <p>Addon Category</p>
+            <select onChange={onAddonChange} name="categoryId" defaultValue="">
               <option value="" disabled>
                 -- Select --
               </option>
-              {subItemCategories.map((item, index) => {
+              {addonCategories.map((item, index) => {
                 return (
-                  <option key={index} value={item.name}>
+                  <option key={index} value={item.categoryId}>
                     {item.name}
                   </option>
                 );
@@ -218,39 +255,39 @@ const Add = ({ url }) => {
           </div>
 
           <div className="add-price flex-col">
-            <p>Sub-Item Price</p>
+            <p>Addon Price</p>
             <input
-              onChange={onSubItemsChange}
-              value={subItems.price}
+              onChange={onAddonChange}
+              value={addons.price}
               type="number"
               name="price"
               placeholder="$20"
             />
           </div>
 
-          <button onClick={addSubItem} className="add-sub-item">
-            Add Sub-Item
+          <button onClick={addNewAddon} className="add-sub-item">
+            Add Addon
           </button>
         </div>
 
         <div className="list add-sub-item-table flex-col">
-          <p>Sub-Items List</p>
+          <p>Addon List</p>
           <div className="sub-items-list-table">
             <div className="sub-items-list-table-format title">
               <b>Name</b>
               <b>Category</b>
               <b>Price</b>
             </div>
-            {data.subItems.length > 0
-              ? data.subItems.map((item, index) => {
+            {data.addons.length > 0
+              ? data.addons.map((item, index) => {
                   return (
                     <div key={index} className="sub-items-list-table-format">
                       <p>{item.name}</p>
-                      <p>{item.category}</p>
+                      <p>{item.categoryName}</p>
                       <p>${item.price}</p>
                       <p
                         className="cursor"
-                        onClick={removeSubItem}
+                        onClick={removeAddon}
                         data-index={index}
                       >
                         X
