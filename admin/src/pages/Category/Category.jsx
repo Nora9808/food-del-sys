@@ -4,19 +4,19 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 const Category = ({ url }) => {
-  const [itemList, setItemList] = useState([]);
-  const [addList, setAddList] = useState([]);
-  const [itemCategory, setItemCategory] = useState({ name: "", type: "" });
-  const [addCategory, setAddCategory] = useState({ name: "", type: "" });
+  const [foodList, setFoodList] = useState([]);
+  const [addonList, setAddonList] = useState([]);
+  const [foodCategory, setFoodCategory] = useState({ name: "", type: "" });
+  const [addonCategory, setAddonCategory] = useState({ name: "", type: "" });
 
   const onChnageHandler = (event, type) => {
     const name = event.target.name;
     const value = event.target.value;
 
-    if (type === "item") {
-      setItemCategory({ [name]: value, type: "item" });
+    if (type === "food") {
+      setFoodCategory({ [name]: value, type: "food" });
     } else {
-      setAddCategory({ [name]: value, type: "additional" });
+      setAddonCategory({ [name]: value, type: "addon" });
     }
   };
 
@@ -24,16 +24,16 @@ const Category = ({ url }) => {
     event.preventDefault();
 
     const data =
-      type === "item"
-        ? { name: itemCategory.name, type: itemCategory.type }
-        : { name: addCategory.name, type: addCategory.type };
+      type === "food"
+        ? { name: foodCategory.name, type: foodCategory.type }
+        : { name: addonCategory.name, type: addonCategory.type };
 
     const response = await axios.post(`${url}/api/category/add`, data);
     await fetchCategories();
 
     if (response.data.success) {
-      setAddCategory({ name: "", type: "" });
-      setItemCategory({ name: "", type: "" });
+      setAddonCategory({ name: "", type: "" });
+      setFoodCategory({ name: "", type: "" });
       toast.success(response.data.message);
     } else {
       toast.error(response.data.message);
@@ -44,14 +44,14 @@ const Category = ({ url }) => {
     const response = await axios.get(`${url}/api/category/list`);
     console.log(response.data);
     if (response.data.success) {
-      const itemCategories = response.data.data.filter(
-        (entry) => entry.type === "item"
+      const foodCategories = response.data.data.filter(
+        (entry) => entry.type === "food"
       );
       const addCategories = response.data.data.filter(
-        (entry) => entry.type === "additional"
+        (entry) => entry.type === "addon"
       );
-      setItemList(itemCategories);
-      setAddList(addCategories);
+      setFoodList(foodCategories);
+      setAddonList(addCategories);
     } else {
       toast.error("Error");
     }
@@ -59,7 +59,7 @@ const Category = ({ url }) => {
 
   const removeCategory = async (categoryId) => {
     const response = await axios.post(`${url}/api/category/remove`, {
-      id: categoryId,
+      categoryId: categoryId,
     });
     await fetchCategories();
     if (response.data.success) {
@@ -79,13 +79,13 @@ const Category = ({ url }) => {
         <div className="add">
           <form
             className="flex-col"
-            onSubmit={(e) => onSubmitHandler(e, "item")}
+            onSubmit={(e) => onSubmitHandler(e, "food")}
           >
             <div className="add-category-name flex-col">
-              <p>Items Category Name</p>
+              <p>Food Category Name</p>
               <input
-                onChange={(e) => onChnageHandler(e, "item")}
-                value={itemCategory.name}
+                onChange={(e) => onChnageHandler(e, "food")}
+                value={foodCategory.name}
                 type="text"
                 name="name"
                 placeholder="type here"
@@ -99,17 +99,17 @@ const Category = ({ url }) => {
         </div>
 
         <div className="list add flex-col">
-          <p>All Items Categories</p>
+          <p>Food Items Categories</p>
           <div className="cat-list-table">
             <div className="list-table-format title">
               <b>Name</b>
             </div>
-            {itemList.map((item, index) => {
+            {foodList.map((item, index) => {
               return (
                 <div key={index} className="cat-list-table-format">
                   <p>{item.name}</p>
                   <p
-                    onClick={() => removeCategory(item._id)}
+                    onClick={() => removeCategory(item.categoryId)}
                     className="cursor"
                   >
                     X
@@ -125,13 +125,13 @@ const Category = ({ url }) => {
         <div className="add">
           <form
             className="flex-col"
-            onSubmit={(e) => onSubmitHandler(e, "add")}
+            onSubmit={(e) => onSubmitHandler(e, "addon")}
           >
             <div className="add-category-name flex-col">
-              <p>Additionals Category Name</p>
+              <p>Addon Category Name</p>
               <input
-                onChange={(e) => onChnageHandler(e, "add")}
-                value={addCategory.name}
+                onChange={(e) => onChnageHandler(e, "addon")}
+                value={addonCategory.name}
                 type="text"
                 name="name"
                 placeholder="type here"
@@ -145,17 +145,17 @@ const Category = ({ url }) => {
         </div>
 
         <div className="list add flex-col">
-          <p>All Additionals Categories</p>
+          <p>All Addons Categories</p>
           <div className="cat-list-table">
             <div className="cat-list-table-format title">
               <b>Name</b>
             </div>
-            {addList.map((item, index) => {
+            {addonList.map((item, index) => {
               return (
                 <div key={index} className="cat-list-table-format">
                   <p>{item.name}</p>
                   <p
-                    onClick={() => removeCategory(item._id)}
+                    onClick={() => removeCategory(item.categoryId)}
                     className="cursor"
                   >
                     X
