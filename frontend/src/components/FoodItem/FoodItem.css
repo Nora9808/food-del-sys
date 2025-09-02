@@ -32,9 +32,14 @@
   width: 70px;
 }
 
-.food-item-desc {
+.food-item-desc,
+.food-item-addons {
   color: #676767;
   font-size: 12px;
+}
+
+.food-item-addons {
+  padding-left: 10px;
 }
 
 .food-item-price {
