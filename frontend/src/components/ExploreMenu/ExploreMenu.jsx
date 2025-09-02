@@ -1,8 +1,27 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./ExploreMenu.css";
-import { menu_list } from "../../assets/assets";
+import axios from "axios";
 
-const ExploreMenu = ({ category, setCategory }) => {
+const ExploreMenu = ({ category, setCategory, url }) => {
+  const [foodCategory, setFoodCategory] = useState([]);
+
+  const fetchCategories = async () => {
+    const response = await axios.get(`${url}/api/category/list`);
+
+    if (response.data.success) {
+      const foodCategories = response.data.data.filter(
+        (entry) => entry.type === "food"
+      );
+      setFoodCategory(foodCategories);
+    } else {
+      console.log("Error");
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
   return (
     <div className="explore-menu" id="explore-menu">
       <h1>Explore our menu</h1>
@@ -12,23 +31,24 @@ const ExploreMenu = ({ category, setCategory }) => {
         one delicious meal at a time.
       </p>
       <div className="explore-menu-list">
-        {menu_list.map((item, index) => {
+        {foodCategory.map((item, index) => {
           return (
             <div
               onClick={() =>
-                setCategory((prev) =>
-                  prev === item.menu_name ? "All" : item.menu_name
-                )
+                setCategory((prev) => (prev === item.name ? "All" : item.name))
               }
               key={index}
               className="explore-menu-list-item"
             >
+              {/**
               <img
                 className={category === item.menu_name ? "active" : ""}
                 src={item.menu_image}
                 alt=""
-              />
-              <p>{item.menu_name}</p>
+              /> */}
+              <p className={category === item.name ? "active" : ""}>
+                {item.name}
+              </p>
             </div>
           );
         })}

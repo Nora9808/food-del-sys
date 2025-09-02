@@ -4,7 +4,7 @@ import { StoreContext } from "../../context/StoreContext";
 import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
-  const { cartItems, food_list, removeFromCart, getTotalCartAmount, url } =
+  const { cartItems, removeFromCart, getTotalCartAmount, url } =
     useContext(StoreContext);
 
   const navigate = useNavigate();
@@ -14,6 +14,7 @@ const Cart = () => {
         <div className="cart-items-title">
           <p>Items</p>
           <p>Title</p>
+          <p>Addons</p>
           <p>Price</p>
           <p>Quantity</p>
           <p>Total</p>
@@ -22,24 +23,40 @@ const Cart = () => {
         <br />
         <hr />
 
-        {food_list.map((item, index) => {
-          if (cartItems[item._id] > 0) {
-            return (
-              <div key={index}>
-                <div className="cart-items-title cart-items-item">
-                  <img src={url + "/images/" + item.image} alt="" />
-                  <p>{item.name}</p>
-                  <p>${item.price}</p>
-                  <p>{cartItems[item._id]}</p>
-                  <p>${item.price * cartItems[item._id]}</p>
-                  <p onClick={() => removeFromCart(item._id)} className="cross">
-                    x
-                  </p>
-                </div>
-                <hr />
+        {cartItems.map((item, index) => {
+          return (
+            <div key={index}>
+              <div className="cart-items-title cart-items-item">
+                <img src={url + "/images/" + item.food.image} alt="" />
+                <p>{item.food.name}</p>
+                <p>
+                  {item.addons.map((addon, index) => (
+                    <span key={index}>
+                      {addon.name} - ${addon.price}
+                      {index < item.addons.length - 1 && <br />}
+                    </span>
+                  ))}
+                </p>
+                <p>${item.food.price}</p>
+                <p>{item.quantity}</p>
+                <p>
+                  $
+                  {(
+                    (parseFloat(item.food.price) +
+                      item.addons.reduce(
+                        (sum, addon) => sum + parseFloat(addon.price),
+                        0
+                      )) *
+                    item.quantity
+                  ).toFixed(2)}
+                </p>
+                <p onClick={() => removeFromCart(item._id)} className="cross">
+                  x
+                </p>
               </div>
-            );
-          }
+              <hr />
+            </div>
+          );
         })}
       </div>
       <div className="cart-bottom">
