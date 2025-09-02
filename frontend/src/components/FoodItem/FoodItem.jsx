@@ -3,9 +3,12 @@ import "./FoodItem.css";
 import { assets } from "../../assets/assets";
 import { StoreContext } from "../../context/StoreContext";
 
-const FoodItem = ({ id, name, price, description, image }) => {
+const FoodItem = ({ foodId, name, price, description, image }) => {
   const { cartItems, addToCart, removeFromCart, url } =
     useContext(StoreContext);
+
+  // Find if this food is already in cart
+  const cartItem = cartItems.find((item) => item.food.foodId === foodId);
 
   return (
     <div className="food-item">
@@ -13,27 +16,28 @@ const FoodItem = ({ id, name, price, description, image }) => {
         <img
           className="food-item-image"
           src={url + "/images/" + image}
-          alt=""
+          alt={name}
         />
-        {!cartItems[id] ? (
+
+        {!cartItem ? (
           <img
             className="add"
-            onClick={() => addToCart(id)}
+            onClick={() => addToCart(foodId)}
             src={assets.add_icon_white}
-            alt=""
+            alt="Add"
           />
         ) : (
           <div className="food-item-counter">
             <img
-              onClick={() => removeFromCart(id)}
+              onClick={() => removeFromCart(cartItem.cartItemId)}
               src={assets.remove_icon_red}
-              alt=""
+              alt="Remove"
             />
-            <p>{cartItems[id]}</p>
+            <p>{cartItem.quantity}</p>
             <img
-              onClick={() => addToCart(id)}
+              onClick={() => addToCart(foodId)}
               src={assets.add_icon_green}
-              alt=""
+              alt="Add More"
             />
           </div>
         )}
@@ -42,10 +46,24 @@ const FoodItem = ({ id, name, price, description, image }) => {
       <div className="food-item-info">
         <div className="food-item-name-rating">
           <p>{name}</p>
-          <img src={assets.rating_starts} alt="" />
+          <img src={assets.rating_starts} alt="rating" />
         </div>
         <p className="food-item-desc">{description}</p>
         <p className="food-item-price">${price}</p>
+
+        {/* Show addons if present */}
+        {cartItem?.addons?.length > 0 && (
+          <div className="food-item-addons">
+            <p>Addons:</p>
+            <ul>
+              {cartItem.addons.map((addon) => (
+                <li key={addon.foodAddId}>
+                  {addon.name} (+${addon.price})
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );
