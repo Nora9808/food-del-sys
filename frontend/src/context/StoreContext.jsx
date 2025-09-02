@@ -4,7 +4,7 @@ import { createContext, useEffect, useState } from "react";
 export const StoreContext = createContext(null);
 
 const StoreContextProvider = (props) => {
-  const [cartItems, setCartItems] = useState({});
+  const [cartItems, setCartItems] = useState([]);
   const url = "http://localhost:4000";
   const [token, setToken] = useState("");
   const [food_list, setFoodList] = useState([]);
@@ -30,7 +30,7 @@ const StoreContextProvider = (props) => {
     if (token) {
       await axios.post(
         url + "/api/cart/remove",
-        { itemId },
+        { cartItemId: itemId },
         { headers: { token } }
       );
     }
@@ -38,19 +38,50 @@ const StoreContextProvider = (props) => {
 
   const getTotalCartAmount = () => {
     let totalAmount = 0;
-    for (const item in cartItems) {
-      if (cartItems[item] > 0) {
-        let itemInfo = food_list.find((product) => product._id === item);
-        totalAmount += itemInfo.price * cartItems[item];
+
+    if (cartItems.length > 0) {
+      for (const item of cartItems) {
+        let addonTotalPrice = 0;
+        for (const addon of item.addons) {
+          addonTotalPrice += parseFloat(addon.price);
+        }
+        totalAmount += addonTotalPrice + parseFloat(item.food.price);
       }
     }
-
     return totalAmount;
   };
 
   const fetchFoodList = async () => {
-    const response = await axios.get(url + "/api/food/list");
-    setFoodList(response.data.data);
+    const foodResponse = await axios.get(`${url}/api/food/list`);
+    const categoryResponse = await axios.get(`${url}/api/category/list`);
+
+    if (foodResponse.data.success && categoryResponse.data.success) {
+      let newFoodList = [];
+      for (let catFood of foodResponse.data.data) {
+        const foodAddonResponse = await axios.get(
+          `${url}/api/addOn/listFoodAddons`,
+          { params: { foodId: catFood.foodId } }
+        );
+
+        if (foodAddonResponse.data.success) {
+          let catId = catFood.categoryId;
+
+          let getCatName = categoryResponse.data.data.filter(
+            (x) => x.categoryId === catId
+          );
+
+          catFood = {
+            ...catFood,
+            category: getCatName[0].name,
+            addonData: foodAddonResponse.data.data,
+          };
+
+          newFoodList.push(catFood);
+        }
+      }
+
+      setFoodList(newFoodList);
+    }
   };
 
   const loadCartData = async (token) => {
@@ -59,7 +90,8 @@ const StoreContextProvider = (props) => {
       {},
       { headers: { token } }
     );
-    setCartItems(response.data.cartData);
+    console.log(response.data.data);
+    setCartItems(response.data.data);
   };
 
   useEffect(() => {
