@@ -8,18 +8,48 @@ function Verify() {
   const [searchParams, setSearchParams] = useSearchParams();
   const success = searchParams.get("success");
   const orderId = searchParams.get("orderId");
-  const { url } = useContext(StoreContext);
+  const { url, token } = useContext(StoreContext);
   const navigate = useNavigate();
 
   const verifyPayment = async () => {
-    const response = await axios.post(url + "/api/order/verify", {
-      success,
-      orderId,
-    });
-    if (response.data.success) {
-      navigate("/myorders");
+    if (success === "true") {
+      const paymentResponse = await axios.post(url + "/api/order/payment", {
+        paymentStatus: "paid",
+        orderId: orderId,
+      });
+
+      const orderResponse = await axios.post(url + "/api/order/orderStatus", {
+        orderStatus: "accepted",
+        orderId: orderId,
+      });
+
+      if (paymentResponse.data.success && orderResponse.data.success) {
+        await axios.post(
+          url + "/api/cart/removeAll",
+          {},
+          { headers: { token } }
+        );
+
+        navigate("/myorders");
+      } else {
+        navigate("/");
+      }
     } else {
-      navigate("/");
+      const paymentResponse2 = await axios.post(url + "/api/order/payment", {
+        paymentStatus: "cancelled",
+        orderId: orderId,
+      });
+
+      const orderResponse2 = await axios.post(url + "/api/order/orderStatus", {
+        orderStatus: "pending",
+        orderId: orderId,
+      });
+
+      if (paymentResponse2.data.success && orderResponse2.data.success) {
+        navigate("/cart");
+      } else {
+        navigate("/");
+      }
     }
   };
 

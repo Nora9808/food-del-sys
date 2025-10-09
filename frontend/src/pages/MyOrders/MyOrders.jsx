@@ -15,6 +15,7 @@ const MyOrders = () => {
       { headers: { token } }
     );
 
+    console.log(response.data.data);
     setData(response.data.data);
   };
 
@@ -22,7 +23,7 @@ const MyOrders = () => {
     if (token) {
       fetchOrders();
     }
-  }, [token]);
+  }, []);
 
   return (
     <div className="my-orders">
@@ -41,13 +42,13 @@ const MyOrders = () => {
                   }
                 })}
               </p>
-              <p>${order.amount}.00</p>
+              <p>${order.totalAmount}.00</p>
               <p>Items: {order.items.length}</p>
               <p>
                 <span>&#x25cf;</span>
-                <b>{order.status}</b>
+                <b>{order.orderStatus}</b>
               </p>
-              <button onClick={fetchOrders()}>Track Order</button>
+              <button onClick={fetchOrders}>Track Order</button>
             </div>
           );
         })}

@@ -77,3 +77,22 @@
 .food-item-counter img {
   width: 30px;
 }
+
+.addons-modal-actions button {
+  border: none;
+  color: white;
+  background-color: tomato;
+  margin: 5px;
+  padding: 3px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.addon-label {
+  color: #676767;
+  font-size: 12px;
+}
+
+.addon-label input {
+  color: #676767;
+}

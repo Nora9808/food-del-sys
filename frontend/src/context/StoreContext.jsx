@@ -17,11 +17,11 @@ const StoreContextProvider = (props) => {
       setCartItems((prev) => ({ ...prev, [itemId]: prev[itemId] + 1 }));
     }
     if (token) {
-      await axios.post(
+      /* await axios.post(
         url + "/api/cart/add",
         { itemId },
         { headers: { token } }
-      );
+      );*/
     }
   };
 
@@ -90,8 +90,10 @@ const StoreContextProvider = (props) => {
       {},
       { headers: { token } }
     );
-    console.log(response.data.data);
-    setCartItems(response.data.data);
+
+    if (response.data.success) {
+      setCartItems(response.data.data);
+    }
   };
 
   useEffect(() => {

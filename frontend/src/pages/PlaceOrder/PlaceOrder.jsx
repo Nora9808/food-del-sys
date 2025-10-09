@@ -6,17 +6,16 @@ import { useContext } from "react";
 import axios from "axios";
 
 const PlaceOrder = () => {
-  const { getTotalCartAmount, token, food_list, cartItems, url } =
+  const { getTotalCartAmount, token, cartItems, url } =
     useContext(StoreContext);
 
   const [data, setData] = useState({
     firstName: "",
     lastName: "",
-    email: "",
-    street: "",
+    address: "",
     city: "",
-    state: "",
-    zipcode: "",
+    province: "",
+    postalcode: "",
     country: "",
     phone: "",
   });
@@ -24,6 +23,7 @@ const PlaceOrder = () => {
   const onChnageHandler = (event) => {
     const name = event.target.name;
     const value = event.target.value;
+
     setData((data) => ({ ...data, [name]: value }));
   };
 
@@ -31,19 +31,43 @@ const PlaceOrder = () => {
     event.preventDefault();
 
     let orderItems = [];
-    food_list.map((item) => {
-      if (cartItems[item._id] > 0) {
-        let itemInfo = item;
-        itemInfo["quantity"] = cartItems[item._id];
-        orderItems.push(itemInfo);
-      }
+
+    cartItems.map((item) => {
+      let addonPrice = 0;
+      let addonIds = [];
+      item.addons.map((addon) => {
+        addonPrice += parseFloat(addon.price);
+        addonIds.push({ id: addon.foodAddId });
+      });
+
+      orderItems.push({
+        foodId: item.food.foodId,
+        name: item.food.name,
+        quantity: parseInt(item.quantity),
+        priceAtOrder: parseFloat(item.food.price),
+        totalItemsPrice:
+          (parseFloat(item.food.price) + addonPrice) * parseInt(item.quantity),
+        addonsIds: addonIds,
+      });
     });
 
     let orderData = {
-      address: data,
+      totalAmount: getTotalCartAmount() + 2,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      address: data.address,
+      country: data.country,
+      city: data.city,
+      province: data.province,
+      postalCode: data.postalcode,
+      phoneNumber: data.phone,
+      orderStatus: "pending",
+      deliveryMethod: "pickup",
+      deliveryTime: "2025-09-10 23:52:48",
+      paymentStatus: "pending",
       items: orderItems,
-      amount: getTotalCartAmount() + 2,
     };
+    console.log(orderData);
 
     let response = await axios.post(url + "/api/order/place", orderData, {
       headers: { token },
@@ -92,19 +116,11 @@ const PlaceOrder = () => {
 
         <input
           required
-          name="email"
+          name="address"
           onChange={onChnageHandler}
-          value={data.email}
-          type="email"
-          placeholder="Email Address"
-        />
-        <input
-          required
-          name="street"
-          onChange={onChnageHandler}
-          value={data.street}
+          value={data.address}
           type="text"
-          placeholder="Street"
+          placeholder="Address"
         />
 
         <div className="multi-fields">
@@ -118,22 +134,22 @@ const PlaceOrder = () => {
           />
           <input
             required
-            name="state"
+            name="province"
             onChange={onChnageHandler}
-            value={data.state}
+            value={data.province}
             type="text"
-            placeholder="State"
+            placeholder="Province"
           />
         </div>
 
         <div className="multi-fields">
           <input
             required
-            name="zipcode"
+            name="postalcode"
             onChange={onChnageHandler}
-            value={data.zipcode}
+            value={data.postalcode}
             type="text"
-            placeholder="Zip Code"
+            placeholder="Postal Code"
           />
           <input
             required
