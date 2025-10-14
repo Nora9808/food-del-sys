@@ -43,12 +43,11 @@ const Cart = () => {
                 <p>
                   $
                   {(
-                    (parseFloat(item.food.price) +
-                      item.addons.reduce(
-                        (sum, addon) => sum + parseFloat(addon.price),
-                        0
-                      )) *
-                    item.quantity
+                    parseFloat(item.food.price) * item.quantity +
+                    item.addons.reduce(
+                      (sum, addon) => sum + parseFloat(addon.price),
+                      0
+                    )
                   ).toFixed(2)}
                 </p>
                 <p onClick={() => removeFromCart(item._id)} className="cross">

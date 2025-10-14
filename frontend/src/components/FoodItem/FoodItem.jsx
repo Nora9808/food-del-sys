@@ -15,19 +15,22 @@ const FoodItem = ({ foodId, name, price, description, image, addons }) => {
   const cartItem = cartItems.find((item) => item.food.foodId === foodId);
 
   const toggleAddonSelection = (addon) => {
-    if (selectedAddons.find((a) => a.foodAddId === addon.foodAddId)) {
-      // remove if already selected
-      setSelectedAddons(
-        selectedAddons.filter((a) => a.foodAddId !== addon.foodAddId)
-      );
-    } else {
-      // add if not selected
-      setSelectedAddons([...selectedAddons, addon]);
-    }
+    const addonId = addon.foodAddId;
+
+    setSelectedAddons((prev) => {
+      if (prev.find((a) => a.id === addonId)) {
+        // remove if already selected
+        return prev.filter((a) => a.id !== addonId);
+      } else {
+        // add if not selected
+        return [...prev, { id: addonId }];
+      }
+    });
   };
 
   const handleAddToCart = () => {
-    addToCart(foodId);
+    let quantity = 1;
+    addToCart(foodId, parseFloat(price), quantity, selectedAddons);
     setShowAddons(false);
     setSelectedAddons([]);
   };
@@ -57,7 +60,7 @@ const FoodItem = ({ foodId, name, price, description, image, addons }) => {
             />
             <p>{cartItem.quantity}</p>
             <img
-              onClick={() => addToCart(foodId)}
+              onClick={() => setShowAddons(true)}
               src={assets.add_icon_green}
               alt="Add More"
             />
@@ -82,19 +85,19 @@ const FoodItem = ({ foodId, name, price, description, image, addons }) => {
                 <p>No addons available</p>
               ) : (
                 addons.map((addon) => (
-                  <>
-                    <label key={addon.foodAddId} className="addon-label">
+                  <React.Fragment key={addon.foodAddId}>
+                    <label className="addon-label">
                       <input
                         type="checkbox"
                         checked={selectedAddons.some(
-                          (a) => a.foodAddId === addon.foodAddId
+                          (a) => a.id === addon.foodAddId
                         )}
                         onChange={() => toggleAddonSelection(addon)}
                       />
                       {addon.name} (+${addon.price})
                     </label>
                     <br />
-                  </>
+                  </React.Fragment>
                 ))
               )}
               <div className="addons-modal-actions">

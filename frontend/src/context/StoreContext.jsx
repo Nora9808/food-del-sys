@@ -9,19 +9,23 @@ const StoreContextProvider = (props) => {
   const [token, setToken] = useState("");
   const [food_list, setFoodList] = useState([]);
 
-  const addToCart = async (itemId) => {
-    //if item doesn't exist, add it
-    if (!cartItems[itemId]) {
-      setCartItems((prev) => ({ ...prev, [itemId]: 1 }));
-    } else {
-      setCartItems((prev) => ({ ...prev, [itemId]: prev[itemId] + 1 }));
-    }
+  const addToCart = async (foodId, price, quantity, selectedAddons) => {
+    console.log(token);
     if (token) {
-      /* await axios.post(
+      const response = await axios.post(
         url + "/api/cart/add",
-        { itemId },
+        {
+          foodId,
+          quantity,
+          price,
+          addonIds: selectedAddons,
+        },
         { headers: { token } }
-      );*/
+      );
+
+      if (response.data.success) {
+        loadCartData(token);
+      }
     }
   };
 
@@ -45,7 +49,8 @@ const StoreContextProvider = (props) => {
         for (const addon of item.addons) {
           addonTotalPrice += parseFloat(addon.price);
         }
-        totalAmount += addonTotalPrice + parseFloat(item.food.price);
+        totalAmount +=
+          addonTotalPrice + parseFloat(item.food.price) * item.quantity;
       }
     }
     return totalAmount;
