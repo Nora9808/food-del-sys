@@ -13,43 +13,31 @@ function Verify() {
 
   const verifyPayment = async () => {
     if (success === "true") {
-      const paymentResponse = await axios.post(url + "/api/order/payment", {
+      await axios.post(url + "/api/order/payment", {
         paymentStatus: "paid",
         orderId: orderId,
       });
 
-      const orderResponse = await axios.post(url + "/api/order/orderStatus", {
+      await axios.post(url + "/api/order/orderStatus", {
         orderStatus: "accepted",
         orderId: orderId,
       });
 
-      if (paymentResponse.data.success && orderResponse.data.success) {
-        await axios.post(
-          url + "/api/cart/removeAll",
-          {},
-          { headers: { token } }
-        );
+      await axios.post(url + "/api/cart/removeAll", {}, { headers: { token } });
 
-        navigate("/myorders");
-      } else {
-        navigate("/");
-      }
+      navigate("/myorders");
     } else {
-      const paymentResponse2 = await axios.post(url + "/api/order/payment", {
+      await axios.post(url + "/api/order/payment", {
         paymentStatus: "cancelled",
         orderId: orderId,
       });
 
-      const orderResponse2 = await axios.post(url + "/api/order/orderStatus", {
+      await axios.post(url + "/api/order/orderStatus", {
         orderStatus: "pending",
         orderId: orderId,
       });
 
-      if (paymentResponse2.data.success && orderResponse2.data.success) {
-        navigate("/cart");
-      } else {
-        navigate("/");
-      }
+      navigate("/cart");
     }
   };
 

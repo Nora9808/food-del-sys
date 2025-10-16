@@ -40,19 +40,22 @@ const PlaceOrder = () => {
         addonIds.push({ id: addon.foodAddId });
       });
 
+      let itemPrice = parseFloat(item.food.price) * parseInt(item.quantity);
       orderItems.push({
         foodId: item.food.foodId,
         name: item.food.name,
         quantity: parseInt(item.quantity),
         priceAtOrder: parseFloat(item.food.price),
-        totalItemsPrice:
-          (parseFloat(item.food.price) + addonPrice) * parseInt(item.quantity),
+        totalItemsPrice: itemPrice + addonPrice,
         addonsIds: addonIds,
       });
     });
 
     let orderData = {
-      totalAmount: getTotalCartAmount() + 2,
+      totalAmount:
+        getTotalCartAmount() +
+        2 +
+        Math.round((getTotalCartAmount() + 2) * 0.13 * 100) / 100,
       firstName: data.firstName,
       lastName: data.lastName,
       address: data.address,
@@ -67,7 +70,6 @@ const PlaceOrder = () => {
       paymentStatus: "pending",
       items: orderItems,
     };
-    console.log(orderData);
 
     let response = await axios.post(url + "/api/order/place", orderData, {
       headers: { token },
@@ -181,6 +183,16 @@ const PlaceOrder = () => {
             </div>
             <hr />
             <div className="cart-total-details">
+              <p>HST(13%)</p>
+              <p>
+                $
+                {getTotalCartAmount() === 0
+                  ? 0
+                  : Math.round((getTotalCartAmount() + 2) * 0.13 * 100) / 100}
+              </p>
+            </div>
+            <hr />
+            <div className="cart-total-details">
               <p>Delivery Fee</p>
               <p>${getTotalCartAmount() === 0 ? 0 : 2}</p>
             </div>
@@ -188,7 +200,12 @@ const PlaceOrder = () => {
             <div className="cart-total-details">
               <b>Total</b>
               <b>
-                ${getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + 2}
+                $
+                {getTotalCartAmount() === 0
+                  ? 0
+                  : getTotalCartAmount() +
+                    2 +
+                    Math.round((getTotalCartAmount() + 2) * 0.13 * 100) / 100}
               </b>
             </div>
           </div>

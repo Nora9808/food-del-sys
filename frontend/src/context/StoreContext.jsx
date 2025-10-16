@@ -53,6 +53,8 @@ const StoreContextProvider = (props) => {
           addonTotalPrice + parseFloat(item.food.price) * item.quantity;
       }
     }
+
+    //totalAmount = totalAmount * 0.13 + totalAmount;
     return totalAmount;
   };
 

@@ -1,14 +1,31 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import "./Cart.css";
 import { StoreContext } from "../../context/StoreContext";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Cart = () => {
   const { cartItems, removeFromCart, getTotalCartAmount, url, token } =
     useContext(StoreContext);
 
   const navigate = useNavigate();
-  console.log(token);
+
+  const [promoCode, setPromoCode] = useState("");
+
+  const onChnageHandler = (event) => {
+    const value = event.target.value;
+    setPromoCode(value);
+  };
+
+  const submitPromoCode = async () => {
+    try {
+      const response = await axios.get(url + "/api/offer/all");
+      console.log(response);
+    } catch (error) {
+      console.error("Error submitting promo code:", error);
+    }
+  };
+
   return (
     <div className="cart">
       <div className="cart-items">
@@ -69,6 +86,16 @@ const Cart = () => {
             </div>
             <hr />
             <div className="cart-total-details">
+              <p>HST(13%)</p>
+              <p>
+                $
+                {getTotalCartAmount() === 0
+                  ? 0
+                  : Math.round((getTotalCartAmount() + 2) * 0.13 * 100) / 100}
+              </p>
+            </div>
+            <hr />
+            <div className="cart-total-details">
               <p>Delivery Fee</p>
               <p>${getTotalCartAmount() === 0 ? 0 : 2}</p>
             </div>
@@ -76,7 +103,12 @@ const Cart = () => {
             <div className="cart-total-details">
               <b>Total</b>
               <b>
-                ${getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + 2}
+                $
+                {getTotalCartAmount() === 0
+                  ? 0
+                  : getTotalCartAmount() +
+                    2 +
+                    Math.round((getTotalCartAmount() + 2) * 0.13 * 100) / 100}
               </b>
             </div>
           </div>
@@ -89,8 +121,12 @@ const Cart = () => {
           <div>
             <p>If you have a promo code, enter it here</p>
             <div className="cart-promocode-input">
-              <input type="text" placeholder="promo code" />
-              <button>Submit</button>
+              <input
+                type="text"
+                onChange={onChnageHandler}
+                placeholder="promo code"
+              />
+              <button onClick={submitPromoCode}>Submit</button>
             </div>
           </div>
         </div>
