@@ -6,8 +6,10 @@ import { useContext } from "react";
 import axios from "axios";
 
 const PlaceOrder = () => {
-  const { getTotalCartAmount, token, cartItems, url } =
+  const { getTotalCartAmount, token, cartItems, url, promoCodeData } =
     useContext(StoreContext);
+  const { subtotal, deliveryFee, hstAmount, total, discountAmount } =
+    getTotalCartAmount();
 
   const [data, setData] = useState({
     firstName: "",
@@ -52,10 +54,11 @@ const PlaceOrder = () => {
     });
 
     let orderData = {
-      totalAmount:
-        getTotalCartAmount() +
-        2 +
-        Math.round((getTotalCartAmount() + 2) * 0.13 * 100) / 100,
+      totalAmount: total,
+      promoCode: promoCodeData.disCode,
+      promoType: promoCodeData.discountType,
+      promoAmount: promoCodeData.discountAmount,
+      discountAmount: discountAmount,
       firstName: data.firstName,
       lastName: data.lastName,
       address: data.address,
@@ -179,34 +182,34 @@ const PlaceOrder = () => {
           <div>
             <div className="cart-total-details">
               <p>Subtotal</p>
-              <p>${getTotalCartAmount()}</p>
+              <p>${subtotal}</p>
             </div>
             <hr />
             <div className="cart-total-details">
               <p>HST(13%)</p>
-              <p>
-                $
-                {getTotalCartAmount() === 0
-                  ? 0
-                  : Math.round((getTotalCartAmount() + 2) * 0.13 * 100) / 100}
-              </p>
+              <p>${subtotal === 0 ? 0 : hstAmount}</p>
             </div>
             <hr />
             <div className="cart-total-details">
               <p>Delivery Fee</p>
-              <p>${getTotalCartAmount() === 0 ? 0 : 2}</p>
+              <p>${subtotal === 0 ? 0 : deliveryFee}</p>
+            </div>
+            <hr />
+            <div className="cart-total-details">
+              <p>
+                Promo{" "}
+                {promoCodeData && promoCodeData.discountAmount != null // ensures discountAmount is defined
+                  ? promoCodeData.discountType === "percent"
+                    ? `${promoCodeData.discountAmount}%`
+                    : `$${promoCodeData.discountAmount}`
+                  : ""}
+              </p>
+              <p>${subtotal === 0 ? 0 : discountAmount}</p>
             </div>
             <hr />
             <div className="cart-total-details">
               <b>Total</b>
-              <b>
-                $
-                {getTotalCartAmount() === 0
-                  ? 0
-                  : getTotalCartAmount() +
-                    2 +
-                    Math.round((getTotalCartAmount() + 2) * 0.13 * 100) / 100}
-              </b>
+              <b>${subtotal === 0 ? 0 : total}</b>
             </div>
           </div>
           <button type="submit">PROCEES TO PAYMENT</button>

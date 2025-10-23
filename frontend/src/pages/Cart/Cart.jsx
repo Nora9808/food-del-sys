@@ -1,29 +1,36 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import "./Cart.css";
 import { StoreContext } from "../../context/StoreContext";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
 const Cart = () => {
-  const { cartItems, removeFromCart, getTotalCartAmount, url, token } =
-    useContext(StoreContext);
+  const {
+    cartItems,
+    removeFromCart,
+    getTotalCartAmount,
+    getPromoCode,
+    promoCodeData,
+    url,
+  } = useContext(StoreContext);
 
   const navigate = useNavigate();
 
   const [promoCode, setPromoCode] = useState("");
+  const [totals, setTotals] = useState(getTotalCartAmount());
 
   const onChnageHandler = (event) => {
     const value = event.target.value;
     setPromoCode(value);
   };
 
+  useEffect(() => {
+    const updatedTotals = getTotalCartAmount();
+    setTotals(updatedTotals); // ✅ sets the entire object at once
+  }, [cartItems, promoCodeData]);
+
   const submitPromoCode = async () => {
-    try {
-      const response = await axios.get(url + "/api/offer/all");
-      console.log(response);
-    } catch (error) {
-      console.error("Error submitting promo code:", error);
-    }
+    await getPromoCode(promoCode); // updates promoCodeData
+    // total will auto-update due to useEffect above
   };
 
   return (
@@ -82,34 +89,35 @@ const Cart = () => {
           <div>
             <div className="cart-total-details">
               <p>Subtotal</p>
-              <p>${getTotalCartAmount()}</p>
+              <p>${totals.subtotal}</p>
             </div>
             <hr />
             <div className="cart-total-details">
               <p>HST(13%)</p>
-              <p>
-                $
-                {getTotalCartAmount() === 0
-                  ? 0
-                  : Math.round((getTotalCartAmount() + 2) * 0.13 * 100) / 100}
-              </p>
+              <p>${totals.subtotal === 0 ? 0 : totals.hstAmount}</p>
             </div>
             <hr />
             <div className="cart-total-details">
               <p>Delivery Fee</p>
-              <p>${getTotalCartAmount() === 0 ? 0 : 2}</p>
+              <p>${totals.subtotal === 0 ? 0 : totals.deliveryFee}</p>
+            </div>
+            <hr />
+            <div className="cart-total-details">
+              <p>
+                Promo{" "}
+                {promoCodeData && promoCodeData.discountAmount != null // ensures discountAmount is defined
+                  ? promoCodeData.discountType === "percent"
+                    ? `${promoCodeData.discountAmount}%`
+                    : `$${promoCodeData.discountAmount}`
+                  : ""}
+              </p>
+              <p>${totals.subtotal === 0 ? 0 : totals.discountAmount}</p>
+              {console.log(totals)}
             </div>
             <hr />
             <div className="cart-total-details">
               <b>Total</b>
-              <b>
-                $
-                {getTotalCartAmount() === 0
-                  ? 0
-                  : getTotalCartAmount() +
-                    2 +
-                    Math.round((getTotalCartAmount() + 2) * 0.13 * 100) / 100}
-              </b>
+              <b>${totals.subtotal === 0 ? 0 : totals.total}</b>
             </div>
           </div>
           <button onClick={() => navigate("/order")}>
@@ -123,6 +131,7 @@ const Cart = () => {
             <div className="cart-promocode-input">
               <input
                 type="text"
+                value={promoCode}
                 onChange={onChnageHandler}
                 placeholder="promo code"
               />

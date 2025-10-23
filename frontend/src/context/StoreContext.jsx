@@ -8,9 +8,9 @@ const StoreContextProvider = (props) => {
   const url = "http://localhost:4000";
   const [token, setToken] = useState("");
   const [food_list, setFoodList] = useState([]);
+  const [promoCodeData, setPromoCodeData] = useState([]);
 
   const addToCart = async (foodId, price, quantity, selectedAddons) => {
-    console.log(token);
     if (token) {
       const response = await axios.post(
         url + "/api/cart/add",
@@ -41,7 +41,10 @@ const StoreContextProvider = (props) => {
   };
 
   const getTotalCartAmount = () => {
-    let totalAmount = 0;
+    let subtotal = 0;
+    let deliveryFee = 2;
+    let hstRate = 13 / 100;
+    let discountAmount = 0;
 
     if (cartItems.length > 0) {
       for (const item of cartItems) {
@@ -49,13 +52,50 @@ const StoreContextProvider = (props) => {
         for (const addon of item.addons) {
           addonTotalPrice += parseFloat(addon.price);
         }
-        totalAmount +=
-          addonTotalPrice + parseFloat(item.food.price) * item.quantity;
+        subtotal +=
+          (parseFloat(item.food.price) + addonTotalPrice) * item.quantity;
       }
     }
 
-    //totalAmount = totalAmount * 0.13 + totalAmount;
-    return totalAmount;
+    let totalBeforeTax = subtotal + deliveryFee;
+    let hstAmount = totalBeforeTax * hstRate;
+    let totalWithTax = totalBeforeTax + hstAmount;
+
+    // Apply promo
+    if (promoCodeData && promoCodeData.discountType) {
+      if (promoCodeData.discountType === "percent") {
+        discountAmount = totalWithTax * (promoCodeData.discountAmount / 100);
+        totalWithTax -= discountAmount;
+      } else {
+        discountAmount = promoCodeData.discountAmount;
+        totalWithTax -= discountAmount;
+      }
+    }
+
+    return {
+      subtotal: Math.round(subtotal * 100) / 100,
+      deliveryFee,
+      hstAmount: Math.round(hstAmount * 100) / 100,
+      discountAmount: Math.round(discountAmount * 100) / 100,
+      total: Math.round(totalWithTax * 100) / 100,
+    };
+  };
+
+  const getPromoCode = async (code) => {
+    try {
+      const response = await axios.get(url + "/api/offer/all");
+      const findCode = response.data.data.find((c) => c.disCode === code);
+
+      if (findCode) {
+        setPromoCodeData(findCode); // ✅ correct syntax
+        console.log("Promo applied:", findCode);
+      } else {
+        setPromoCodeData({}); // clear if invalid
+        console.warn("Invalid promo code");
+      }
+    } catch (error) {
+      console.error("Error fetching promo codes:", error);
+    }
   };
 
   const fetchFoodList = async () => {
@@ -122,6 +162,8 @@ const StoreContextProvider = (props) => {
     addToCart,
     removeFromCart,
     getTotalCartAmount,
+    getPromoCode,
+    promoCodeData,
     url,
     token,
     setToken,
