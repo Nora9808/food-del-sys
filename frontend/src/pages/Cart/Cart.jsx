@@ -111,8 +111,7 @@ const Cart = () => {
                     : `$${promoCodeData.discountAmount}`
                   : ""}
               </p>
-              <p>${totals.subtotal === 0 ? 0 : totals.discountAmount}</p>
-              {console.log(totals)}
+              <p>-${totals.subtotal === 0 ? 0 : totals.discountAmount}</p>
             </div>
             <hr />
             <div className="cart-total-details">

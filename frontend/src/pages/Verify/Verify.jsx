@@ -8,36 +8,55 @@ function Verify() {
   const [searchParams, setSearchParams] = useSearchParams();
   const success = searchParams.get("success");
   const orderId = searchParams.get("orderId");
-  const { url, token } = useContext(StoreContext);
+  const { url, setCartItems } = useContext(StoreContext);
   const navigate = useNavigate();
 
   const verifyPayment = async () => {
-    if (success === "true") {
-      await axios.post(url + "/api/order/payment", {
-        paymentStatus: "paid",
-        orderId: orderId,
-      });
+    // Read token from localStorage (survives page reload)
+    const token = localStorage.getItem("token");
 
-      await axios.post(url + "/api/order/orderStatus", {
-        orderStatus: "accepted",
-        orderId: orderId,
-      });
+    if (!token) {
+      console.error("No token found. Redirecting to login.");
+    }
 
-      await axios.post(url + "/api/cart/removeAll", {}, { headers: { token } });
+    try {
+      if (success === "true") {
+        await axios.post(url + "/api/order/payment", {
+          paymentStatus: "paid",
+          orderId: orderId,
+        });
 
-      navigate("/myorders");
-    } else {
-      await axios.post(url + "/api/order/payment", {
-        paymentStatus: "cancelled",
-        orderId: orderId,
-      });
+        await axios.post(url + "/api/order/orderStatus", {
+          orderStatus: "accepted",
+          orderId: orderId,
+        });
 
-      await axios.post(url + "/api/order/orderStatus", {
-        orderStatus: "pending",
-        orderId: orderId,
-      });
+        // Remove all cart items
+        const res = await axios.post(
+          `${url}/api/cart/removeAll`,
+          {},
+          { headers: { token } }
+        );
 
-      navigate("/cart");
+        if (res.data.success) {
+          setCartItems([]);
+        }
+        navigate("/myorders");
+      } else {
+        await axios.post(url + "/api/order/payment", {
+          paymentStatus: "cancelled",
+          orderId: orderId,
+        });
+
+        await axios.post(url + "/api/order/orderStatus", {
+          orderStatus: "pending",
+          orderId: orderId,
+        });
+
+        navigate("/cart");
+      }
+    } catch (error) {
+      console.error("Error verifying payment:", err);
     }
   };
 

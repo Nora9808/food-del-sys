@@ -204,7 +204,7 @@ const PlaceOrder = () => {
                     : `$${promoCodeData.discountAmount}`
                   : ""}
               </p>
-              <p>${subtotal === 0 ? 0 : discountAmount}</p>
+              <p>-${subtotal === 0 ? 0 : discountAmount}</p>
             </div>
             <hr />
             <div className="cart-total-details">

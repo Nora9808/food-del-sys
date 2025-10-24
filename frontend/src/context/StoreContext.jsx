@@ -58,19 +58,21 @@ const StoreContextProvider = (props) => {
     }
 
     let totalBeforeTax = subtotal + deliveryFee;
-    let hstAmount = totalBeforeTax * hstRate;
-    let totalWithTax = totalBeforeTax + hstAmount;
 
-    // Apply promo
+    // ✅ Apply promo BEFORE calculating HST
     if (promoCodeData && promoCodeData.discountType) {
       if (promoCodeData.discountType === "percent") {
-        discountAmount = totalWithTax * (promoCodeData.discountAmount / 100);
-        totalWithTax -= discountAmount;
+        discountAmount = totalBeforeTax * (promoCodeData.discountAmount / 100);
+        totalBeforeTax -= discountAmount;
       } else {
         discountAmount = promoCodeData.discountAmount;
-        totalWithTax -= discountAmount;
+        totalBeforeTax -= discountAmount;
       }
     }
+
+    // ✅ Now calculate HST on the discounted subtotal
+    let hstAmount = totalBeforeTax * hstRate;
+    let totalWithTax = totalBeforeTax + hstAmount;
 
     return {
       subtotal: Math.round(subtotal * 100) / 100,
