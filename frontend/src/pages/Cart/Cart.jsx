@@ -2,6 +2,8 @@ import React, { useContext, useState, useEffect } from "react";
 import "./Cart.css";
 import { StoreContext } from "../../context/StoreContext";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Cart = () => {
   const {
@@ -20,6 +22,7 @@ const Cart = () => {
 
   const onChnageHandler = (event) => {
     const value = event.target.value;
+
     setPromoCode(value);
   };
 
@@ -29,8 +32,19 @@ const Cart = () => {
   }, [cartItems, promoCodeData]);
 
   const submitPromoCode = async () => {
-    await getPromoCode(promoCode); // updates promoCodeData
-    // total will auto-update due to useEffect above
+    const message = await getPromoCode(promoCode);
+
+    if (message.includes("!")) {
+      toast.warn(message, {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    } else {
+      toast.success(message, {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }
   };
 
   return (
@@ -134,11 +148,15 @@ const Cart = () => {
                 onChange={onChnageHandler}
                 placeholder="promo code"
               />
-              <button onClick={submitPromoCode}>Submit</button>
+              <button onClick={submitPromoCode} style={{ cursor: "pointer" }}>
+                Submit
+              </button>
             </div>
           </div>
         </div>
       </div>
+      {/* place ToastContainer once in your app */}
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 };

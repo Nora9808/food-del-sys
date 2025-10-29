@@ -88,13 +88,38 @@ const StoreContextProvider = (props) => {
       const response = await axios.get(url + "/api/offer/all");
       const findCode = response.data.data.find((c) => c.disCode === code);
 
+      const ordersResponse = await axios.post(
+        url + "/api/order/userorders",
+        {},
+        { headers: { token } }
+      );
+
+      let filterData = ordersResponse.data.data.filter(
+        (x) => x.promoCode === findCode.disCode
+      );
+
+      let promoMsg = "";
+      const today = new Date();
+      const start = new Date(findCode.startDate);
+      const end = new Date(findCode.endDate);
+
       if (findCode) {
-        setPromoCodeData(findCode); // ✅ correct syntax
-        console.log("Promo applied:", findCode);
+        if (today < start) {
+          promoMsg = "Promo code not yet active!";
+        } else if (today > end) {
+          promoMsg = "Promo code expired!";
+        } else if (filterData.length >= findCode.limitPerUser) {
+          promoMsg = "You reached the promo code usage limit!";
+        } else {
+          setPromoCodeData(findCode); // ✅ correct syntax
+          (promoMsg = "Promo applied"), findCode;
+        }
       } else {
         setPromoCodeData({}); // clear if invalid
-        console.warn("Invalid promo code");
+        promoMsg = "Invalid promo code!";
       }
+
+      return promoMsg;
     } catch (error) {
       console.error("Error fetching promo codes:", error);
     }

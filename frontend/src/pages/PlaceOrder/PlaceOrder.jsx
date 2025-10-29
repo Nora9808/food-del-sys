@@ -6,8 +6,14 @@ import { useContext } from "react";
 import axios from "axios";
 
 const PlaceOrder = () => {
-  const { getTotalCartAmount, token, cartItems, url, promoCodeData } =
-    useContext(StoreContext);
+  const {
+    getTotalCartAmount,
+    token,
+    cartItems,
+    url,
+    promoCodeData,
+    setPromoMsg,
+  } = useContext(StoreContext);
   const { subtotal, deliveryFee, hstAmount, total, discountAmount } =
     getTotalCartAmount();
 
@@ -78,6 +84,7 @@ const PlaceOrder = () => {
       headers: { token },
     });
     if (response.data.success) {
+      setPromoMsg("");
       const { session_url } = response.data;
       window.location.replace(session_url);
     } else {
