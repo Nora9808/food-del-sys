@@ -8,20 +8,24 @@ const StoreContextProvider = (props) => {
   const url = "http://localhost:4000";
   const [token, setToken] = useState("");
   const [food_list, setFoodList] = useState([]);
+  const [promoCodeData, setPromoCodeData] = useState([]);
 
-  const addToCart = async (itemId) => {
-    //if item doesn't exist, add it
-    if (!cartItems[itemId]) {
-      setCartItems((prev) => ({ ...prev, [itemId]: 1 }));
-    } else {
-      setCartItems((prev) => ({ ...prev, [itemId]: prev[itemId] + 1 }));
-    }
+  const addToCart = async (foodId, price, quantity, selectedAddons) => {
     if (token) {
-      await axios.post(
+      const response = await axios.post(
         url + "/api/cart/add",
-        { itemId },
+        {
+          foodId,
+          quantity,
+          price,
+          addonIds: selectedAddons,
+        },
         { headers: { token } }
       );
+
+      if (response.data.success) {
+        loadCartData(token);
+      }
     }
   };
 
@@ -37,7 +41,10 @@ const StoreContextProvider = (props) => {
   };
 
   const getTotalCartAmount = () => {
-    let totalAmount = 0;
+    let subtotal = 0;
+    let deliveryFee = 2;
+    let hstRate = 13 / 100;
+    let discountAmount = 0;
 
     if (cartItems.length > 0) {
       for (const item of cartItems) {
@@ -45,10 +52,77 @@ const StoreContextProvider = (props) => {
         for (const addon of item.addons) {
           addonTotalPrice += parseFloat(addon.price);
         }
-        totalAmount += addonTotalPrice + parseFloat(item.food.price);
+        subtotal +=
+          (parseFloat(item.food.price) + addonTotalPrice) * item.quantity;
       }
     }
-    return totalAmount;
+
+    let totalBeforeTax = subtotal + deliveryFee;
+
+    // ✅ Apply promo BEFORE calculating HST
+    if (promoCodeData && promoCodeData.discountType) {
+      if (promoCodeData.discountType === "percent") {
+        discountAmount = totalBeforeTax * (promoCodeData.discountAmount / 100);
+        totalBeforeTax -= discountAmount;
+      } else {
+        discountAmount = promoCodeData.discountAmount;
+        totalBeforeTax -= discountAmount;
+      }
+    }
+
+    // ✅ Now calculate HST on the discounted subtotal
+    let hstAmount = totalBeforeTax * hstRate;
+    let totalWithTax = totalBeforeTax + hstAmount;
+
+    return {
+      subtotal: Math.round(subtotal * 100) / 100,
+      deliveryFee,
+      hstAmount: Math.round(hstAmount * 100) / 100,
+      discountAmount: Math.round(discountAmount * 100) / 100,
+      total: Math.round(totalWithTax * 100) / 100,
+    };
+  };
+
+  const getPromoCode = async (code) => {
+    try {
+      const response = await axios.get(url + "/api/offer/all");
+      const findCode = response.data.data.find((c) => c.disCode === code);
+
+      const ordersResponse = await axios.post(
+        url + "/api/order/userorders",
+        {},
+        { headers: { token } }
+      );
+
+      let filterData = ordersResponse.data.data.filter(
+        (x) => x.promoCode === findCode.disCode
+      );
+
+      let promoMsg = "";
+      const today = new Date();
+      const start = new Date(findCode.startDate);
+      const end = new Date(findCode.endDate);
+
+      if (findCode) {
+        if (today < start) {
+          promoMsg = "Promo code not yet active!";
+        } else if (today > end) {
+          promoMsg = "Promo code expired!";
+        } else if (filterData.length >= findCode.limitPerUser) {
+          promoMsg = "You reached the promo code usage limit!";
+        } else {
+          setPromoCodeData(findCode); // ✅ correct syntax
+          (promoMsg = "Promo applied"), findCode;
+        }
+      } else {
+        setPromoCodeData({}); // clear if invalid
+        promoMsg = "Invalid promo code!";
+      }
+
+      return promoMsg;
+    } catch (error) {
+      console.error("Error fetching promo codes:", error);
+    }
   };
 
   const fetchFoodList = async () => {
@@ -90,8 +164,10 @@ const StoreContextProvider = (props) => {
       {},
       { headers: { token } }
     );
-    console.log(response.data.data);
-    setCartItems(response.data.data);
+
+    if (response.data.success) {
+      setCartItems(response.data.data);
+    }
   };
 
   useEffect(() => {
@@ -113,6 +189,8 @@ const StoreContextProvider = (props) => {
     addToCart,
     removeFromCart,
     getTotalCartAmount,
+    getPromoCode,
+    promoCodeData,
     url,
     token,
     setToken,

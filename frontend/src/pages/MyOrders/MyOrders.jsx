@@ -28,29 +28,43 @@ const MyOrders = () => {
     <div className="my-orders">
       <h2>My Orders</h2>
       <div className="container">
-        {data.map((order, index) => {
-          return (
-            <div key={index} className="my-orders-order">
-              <img src={assets.parcel_icon} alt="" />
-              <p>
-                {order.items.map((item, index) => {
-                  if (index === order.items.length - 1) {
-                    return item.name + " x " + item.quantity;
-                  } else {
-                    return item.name + " x " + item.quantity + ",";
-                  }
-                })}
-              </p>
-              <p>${order.amount}.00</p>
-              <p>Items: {order.items.length}</p>
-              <p>
-                <span>&#x25cf;</span>
-                <b>{order.status}</b>
-              </p>
-              <button onClick={fetchOrders()}>Track Order</button>
+        {data.map((order, orderIndex) => (
+          <div key={orderIndex} className="my-orders-order">
+            <img src={assets.parcel_icon} alt="" />
+
+            {/* --- Order Items --- */}
+            <div className="order-items">
+              {order.items.map((item, itemIndex) => (
+                <div key={itemIndex} className="order-item">
+                  <p>
+                    <strong>{item.name}</strong> × {item.quantity}
+                  </p>
+
+                  {/* --- Addons (if any) --- */}
+                  {item.addons && item.addons.length > 0 && (
+                    <ul className="addons-list">
+                      {item.addons.map((addon, addonIndex) => (
+                        <li key={addonIndex} className="addon-item">
+                          {addon.name} (${addon.price})
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
             </div>
-          );
-        })}
+
+            {/* --- Order Summary --- */}
+            <p>Total: ${order.totalAmount}</p>
+            <p>Items: {order.items.length}</p>
+            <p>
+              <span>&#x25cf;</span>
+              <b>{order.orderStatus}</b>
+            </p>
+
+            <button onClick={fetchOrders}>Track Order</button>
+          </div>
+        ))}
       </div>
     </div>
   );

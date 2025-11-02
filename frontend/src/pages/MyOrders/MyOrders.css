@@ -42,6 +42,22 @@
   color: #454545;
 }
 
+.order-item {
+  margin-bottom: 8px;
+}
+
+.addons-list {
+  margin: 4px 0 8px 16px;
+  padding: 0;
+  list-style: none;
+  color: #555;
+  font-size: 14px;
+}
+
+.addon-item {
+  margin-bottom: 2px;
+}
+
 @media (max-width: 900px) {
   .my-orders-order {
     grid-template-columns: 1fr 2fr 1fr;

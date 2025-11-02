@@ -1,13 +1,52 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import "./Cart.css";
 import { StoreContext } from "../../context/StoreContext";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Cart = () => {
-  const { cartItems, removeFromCart, getTotalCartAmount, url } =
-    useContext(StoreContext);
+  const {
+    cartItems,
+    removeFromCart,
+    getTotalCartAmount,
+    getPromoCode,
+    promoCodeData,
+    url,
+  } = useContext(StoreContext);
 
   const navigate = useNavigate();
+
+  const [promoCode, setPromoCode] = useState("");
+  const [totals, setTotals] = useState(getTotalCartAmount());
+
+  const onChnageHandler = (event) => {
+    const value = event.target.value;
+
+    setPromoCode(value);
+  };
+
+  useEffect(() => {
+    const updatedTotals = getTotalCartAmount();
+    setTotals(updatedTotals); // ✅ sets the entire object at once
+  }, [cartItems, promoCodeData]);
+
+  const submitPromoCode = async () => {
+    const message = await getPromoCode(promoCode);
+
+    if (message.includes("!")) {
+      toast.warn(message, {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    } else {
+      toast.success(message, {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }
+  };
+
   return (
     <div className="cart">
       <div className="cart-items">
@@ -42,12 +81,11 @@ const Cart = () => {
                 <p>
                   $
                   {(
-                    (parseFloat(item.food.price) +
-                      item.addons.reduce(
-                        (sum, addon) => sum + parseFloat(addon.price),
-                        0
-                      )) *
-                    item.quantity
+                    parseFloat(item.food.price) * item.quantity +
+                    item.addons.reduce(
+                      (sum, addon) => sum + parseFloat(addon.price),
+                      0
+                    )
                   ).toFixed(2)}
                 </p>
                 <p onClick={() => removeFromCart(item._id)} className="cross">
@@ -65,19 +103,34 @@ const Cart = () => {
           <div>
             <div className="cart-total-details">
               <p>Subtotal</p>
-              <p>${getTotalCartAmount()}</p>
+              <p>${totals.subtotal}</p>
+            </div>
+            <hr />
+            <div className="cart-total-details">
+              <p>HST(13%)</p>
+              <p>${totals.subtotal === 0 ? 0 : totals.hstAmount}</p>
             </div>
             <hr />
             <div className="cart-total-details">
               <p>Delivery Fee</p>
-              <p>${getTotalCartAmount() === 0 ? 0 : 2}</p>
+              <p>${totals.subtotal === 0 ? 0 : totals.deliveryFee}</p>
+            </div>
+            <hr />
+            <div className="cart-total-details">
+              <p>
+                Promo{" "}
+                {promoCodeData && promoCodeData.discountAmount != null // ensures discountAmount is defined
+                  ? promoCodeData.discountType === "percent"
+                    ? `${promoCodeData.discountAmount}%`
+                    : `$${promoCodeData.discountAmount}`
+                  : ""}
+              </p>
+              <p>-${totals.subtotal === 0 ? 0 : totals.discountAmount}</p>
             </div>
             <hr />
             <div className="cart-total-details">
               <b>Total</b>
-              <b>
-                ${getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + 2}
-              </b>
+              <b>${totals.subtotal === 0 ? 0 : totals.total}</b>
             </div>
           </div>
           <button onClick={() => navigate("/order")}>
@@ -89,12 +142,21 @@ const Cart = () => {
           <div>
             <p>If you have a promo code, enter it here</p>
             <div className="cart-promocode-input">
-              <input type="text" placeholder="promo code" />
-              <button>Submit</button>
+              <input
+                type="text"
+                value={promoCode}
+                onChange={onChnageHandler}
+                placeholder="promo code"
+              />
+              <button onClick={submitPromoCode} style={{ cursor: "pointer" }}>
+                Submit
+              </button>
             </div>
           </div>
         </div>
       </div>
+      {/* place ToastContainer once in your app */}
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 };

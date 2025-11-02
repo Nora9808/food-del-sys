@@ -6,6 +6,8 @@ import Add from "./pages/Add/Add";
 import List from "./pages/List/List";
 import Orders from "./pages/Orders/Orders";
 import Category from "./pages/Category/Category";
+import Offer from "./pages/Offer/Offer";
+import OfferList from "./pages/OfferList/OfferList";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -22,6 +24,8 @@ const App = () => {
         <Routes>
           <Route path="/category" element={<Category url={url} />} />
           <Route path="/add" element={<Add url={url} />} />
+          <Route path="/offer" element={<Offer url={url} />} />
+          <Route path="/offerList" element={<OfferList url={url} />} />
           <Route path="/list" element={<List url={url} />} />
           <Route path="/orders" element={<Orders url={url} />} />
         </Routes>

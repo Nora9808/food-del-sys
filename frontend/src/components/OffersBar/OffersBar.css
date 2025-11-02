@@ -1,0 +1,39 @@
+.offers-bar {
+  text-align: center;
+  margin: 20px auto;
+}
+
+.offers-bar h1 {
+  color: #262626;
+  font-weight: 500;
+}
+
+.offers-list {
+  display: flex;
+  flex-wrap: wrap; /* allows wrapping if too many offers */
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.offer-card {
+  background-color: tomato;
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  width: 150px;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s, box-shadow 0.2s;
+  margin-bottom: 50px;
+}
+
+.offer-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
