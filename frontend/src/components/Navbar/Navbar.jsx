@@ -9,6 +9,7 @@ const Navbar = ({ setShowLogin }) => {
   const [menu, setMenu] = useState("home");
 
   const { getTotalCartAmount, token, setToken } = useContext(StoreContext);
+  const { subtotal } = getTotalCartAmount();
 
   const navigate = useNavigate();
 
@@ -62,7 +63,7 @@ const Navbar = ({ setShowLogin }) => {
           <Link to="/cart">
             <img src={assets.basket_icon} alt="" />
           </Link>
-          <div className={getTotalCartAmount() === 0 ? "" : "dot"}></div>
+          <div className={subtotal === 0 ? "" : "dot"}></div>
         </div>
         {!token ? (
           <button onClick={() => setShowLogin(true)}>sign in</button>

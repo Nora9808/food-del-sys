@@ -1,0 +1,40 @@
+.offer {
+  width: 70%;
+  margin-left: max(5vw, 25px);
+  margin-top: 50px;
+  color: #6d6d6d;
+  font-size: 16px;
+}
+
+.offer form {
+  gap: 20px;
+}
+
+.add-offer-name,
+.add-offer-amount,
+.add-offer-code,
+.add-offer-limit {
+  width: max(40%, 280px);
+}
+
+.add-offer-name input,
+.add-offer-amount input,
+.add-offer-code input,
+.add-offer-limit input {
+  padding: 10px;
+}
+
+.offer-type,
+.add-offer-start,
+.add-offer-end {
+  display: flex;
+  gap: 30px;
+}
+
+.offer-type select,
+.offer-type input,
+.add-offer-start input,
+.add-offer-end input {
+  max-width: 200px;
+  padding: 10px;
+}
