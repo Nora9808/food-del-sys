@@ -6,14 +6,8 @@ import { useContext } from "react";
 import axios from "axios";
 
 const PlaceOrder = () => {
-  const {
-    getTotalCartAmount,
-    token,
-    cartItems,
-    url,
-    promoCodeData,
-    setPromoMsg,
-  } = useContext(StoreContext);
+  const { getTotalCartAmount, cartItems, url, promoCodeData, setPromoMsg } =
+    useContext(StoreContext);
   const { subtotal, deliveryFee, hstAmount, total, discountAmount } =
     getTotalCartAmount();
 
@@ -80,9 +74,7 @@ const PlaceOrder = () => {
       items: orderItems,
     };
 
-    let response = await axios.post(url + "/api/order/place", orderData, {
-      headers: { token },
-    });
+    let response = await axios.post(url + "/api/order/place", orderData);
     if (response.data.success) {
       setPromoMsg("");
       const { session_url } = response.data;
@@ -93,14 +85,6 @@ const PlaceOrder = () => {
   };
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!token) {
-      navigate("/cart");
-    } else if (getTotalCartAmount() == 0) {
-      navigate("/cart");
-    }
-  }, [token]);
 
   return (
     <form onSubmit={placeOrder} className="place-order">

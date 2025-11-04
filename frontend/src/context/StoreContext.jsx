@@ -6,37 +6,51 @@ export const StoreContext = createContext(null);
 const StoreContextProvider = (props) => {
   const [cartItems, setCartItems] = useState([]);
   const url = "http://localhost:4000";
-  const [token, setToken] = useState("");
+  const [cartId, setCartId] = useState("");
   const [food_list, setFoodList] = useState([]);
   const [promoCodeData, setPromoCodeData] = useState([]);
 
   const addToCart = async (foodId, price, quantity, selectedAddons) => {
-    if (token) {
-      const response = await axios.post(
-        url + "/api/cart/add",
-        {
-          foodId,
-          quantity,
-          price,
-          addonIds: selectedAddons,
-        },
-        { headers: { token } }
-      );
+    let newCartId = cartId;
 
-      if (response.data.success) {
-        loadCartData(token);
+    // Create new cart if empty
+    if (cartItems.length === 0) {
+      const cartIdResponse = await axios.post(url + "/api/cart/getId");
+      if (cartIdResponse.data.success) {
+        newCartId = cartIdResponse.data.data;
+        setCartId(newCartId); // still update state
       }
+    }
+
+    console.log(newCartId);
+    // Use the local newCartId (guaranteed to be correct)
+    if (newCartId !== "") {
+      const response = await axios.post(url + "/api/cart/add", {
+        cartId: newCartId,
+        foodId,
+        quantity,
+        price,
+        addonIds: selectedAddons,
+      });
+
+      console.log(response.data.success);
+      if (response.data.success) {
+        loadCartData(newCartId);
+      } else {
+        console.error("Add to cart failed:", response.data.message);
+      }
+    } else {
+      console.error("Cart ID is still empty");
     }
   };
 
   const removeFromCart = async (itemId) => {
     setCartItems((prev) => ({ ...prev, [itemId]: prev[itemId] - 1 }));
-    if (token) {
-      await axios.post(
-        url + "/api/cart/remove",
-        { cartItemId: itemId },
-        { headers: { token } }
-      );
+    if (cartId !== "") {
+      await axios.post(url + "/api/cart/remove", {
+        cartItemId: itemId,
+        cartId: cartId,
+      });
     }
   };
 
@@ -87,7 +101,7 @@ const StoreContextProvider = (props) => {
     try {
       const response = await axios.get(url + "/api/offer/all");
       const findCode = response.data.data.find((c) => c.disCode === code);
-
+      /*
       const ordersResponse = await axios.post(
         url + "/api/order/userorders",
         {},
@@ -96,7 +110,7 @@ const StoreContextProvider = (props) => {
 
       let filterData = ordersResponse.data.data.filter(
         (x) => x.promoCode === findCode.disCode
-      );
+      );*/
 
       let promoMsg = "";
       const today = new Date();
@@ -108,9 +122,9 @@ const StoreContextProvider = (props) => {
           promoMsg = "Promo code not yet active!";
         } else if (today > end) {
           promoMsg = "Promo code expired!";
-        } else if (filterData.length >= findCode.limitPerUser) {
+        } /* else if (filterData.length >= findCode.limitPerUser) {
           promoMsg = "You reached the promo code usage limit!";
-        } else {
+        }*/ else {
           setPromoCodeData(findCode); // ✅ correct syntax
           (promoMsg = "Promo applied"), findCode;
         }
@@ -158,15 +172,21 @@ const StoreContextProvider = (props) => {
     }
   };
 
-  const loadCartData = async (token) => {
-    const response = await axios.post(
-      url + "/api/cart/get",
-      {},
-      { headers: { token } }
-    );
+  const loadCartData = async (id) => {
+    if (cartId !== "") {
+      const response = await axios.post(url + "/api/cart/get", {
+        cartId: cartId,
+      });
 
-    if (response.data.success) {
-      setCartItems(response.data.data);
+      if (response.data.success) {
+        setCartItems(response.data.data);
+      }
+    } else {
+      const response = await axios.post(url + "/api/cart/get", { cartId: id });
+
+      if (response.data.success) {
+        setCartItems(response.data.data);
+      }
     }
   };
 
@@ -174,12 +194,11 @@ const StoreContextProvider = (props) => {
     async function loadData() {
       await fetchFoodList();
 
-      if (localStorage.getItem("token")) {
-        setToken(localStorage.getItem("token"));
-        await loadCartData(localStorage.getItem("token"));
+      if (cartId !== "") {
+        await loadCartData(cartId);
       }
     }
-    loadData();
+    loadData(cartId);
   }, []);
 
   const contextValue = {
@@ -192,8 +211,7 @@ const StoreContextProvider = (props) => {
     getPromoCode,
     promoCodeData,
     url,
-    token,
-    setToken,
+    cartId,
   };
 
   return (

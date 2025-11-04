@@ -40,13 +40,14 @@ const Navbar = ({ setShowLogin }) => {
         >
           menu
         </a>
+        {/*
         <a
           href="#app-download"
           onClick={() => setMenu("mobile-app")}
           className={menu === "mobile-app" ? "active" : ""}
         >
           mobile-app
-        </a>
+        </a>*/}
         <a
           href="#footer"
           onClick={() => setMenu("contact-us")}
@@ -57,7 +58,7 @@ const Navbar = ({ setShowLogin }) => {
       </ul>
 
       <div className="navbar-right">
-        <img src={assets.search_icon} alt="" />
+        {/*<img src={assets.search_icon} alt="" />*/}
 
         <div className="navbar-search-icon">
           <Link to="/cart">
@@ -65,7 +66,7 @@ const Navbar = ({ setShowLogin }) => {
           </Link>
           <div className={subtotal === 0 ? "" : "dot"}></div>
         </div>
-        {!token ? (
+        {/*!token ? (
           <button onClick={() => setShowLogin(true)}>sign in</button>
         ) : (
           <div className="navbar-profile">
@@ -82,7 +83,7 @@ const Navbar = ({ setShowLogin }) => {
               </li>
             </ul>
           </div>
-        )}
+        )*/}
       </div>
     </div>
   );
