@@ -1,28 +1,29 @@
 import React, { useState } from "react";
 import "./Navbar.css";
 import { assets } from "../../assets/assets";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useContext } from "react";
 import { StoreContext } from "../../context/StoreContext";
 
-const Navbar = ({ setShowLogin }) => {
+const Navbar = () => {
   const [menu, setMenu] = useState("home");
 
-  const { getTotalCartAmount, token, setToken } = useContext(StoreContext);
+  const { getTotalCartAmount } = useContext(StoreContext);
   const { subtotal } = getTotalCartAmount();
 
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
+  /*
   const logout = () => {
     localStorage.removeItem("token");
     setToken("");
     navigate("/");
-  };
+  };*/
 
   return (
     <div className="navbar">
       <Link to="/">
-        <img src={assets.logo} alt="" className="log" />
+        <img src={assets.pizzaLogo} alt="" className="log" />
       </Link>
 
       <ul className="navbar-menu">

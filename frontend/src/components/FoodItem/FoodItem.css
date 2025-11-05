@@ -43,7 +43,7 @@
 }
 
 .food-item-price {
-  color: tomato;
+  color: #b03060;
   font-size: 22px;
   font-weight: 500;
   margin: 10px 0px;
@@ -81,7 +81,7 @@
 .addons-modal-actions button {
   border: none;
   color: white;
-  background-color: tomato;
+  background-color: #b03060;
   margin: 5px;
   padding: 3px;
   border-radius: 4px;

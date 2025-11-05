@@ -18,6 +18,7 @@ const StoreContextProvider = (props) => {
       const cartIdResponse = await axios.post(url + "/api/cart/getId");
       if (cartIdResponse.data.success) {
         newCartId = cartIdResponse.data.data;
+        localStorage.setItem("cartId", cartId);
         setCartId(newCartId); // still update state
       }
     }
