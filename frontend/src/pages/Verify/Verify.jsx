@@ -1,4 +1,4 @@
-import React, { createRef, useContext, useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { StoreContext } from "../../context/StoreContext";
 import "./Verify.css";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -25,16 +25,15 @@ function Verify() {
         });
 
         let cartId = localStorage.getItem("cartId");
+
         // Remove all cart items
         const res = await axios.post(`${url}/api/cart/removeAll`, {
           cartId: cartId,
         });
 
-        console.log(cartId);
-        console.log(res);
-
         if (res.data.success) {
           setCartItems([]);
+          localStorage.removeItem("cartId");
         }
 
         navigate("/");
@@ -52,7 +51,7 @@ function Verify() {
         navigate("/cart");
       }
     } catch (error) {
-      console.error("Error verifying payment:", err);
+      console.error("Error verifying payment:", error);
     }
   };
 
