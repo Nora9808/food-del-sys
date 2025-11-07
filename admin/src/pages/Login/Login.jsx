@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
 import axios from "axios";
 import logo from "../../assets/pizzaLogo.png"; // adjust path if needed
+import { toast } from "react-toastify";
 
 const Login = ({ url }) => {
   //const [email, setEmail] = useState("");
@@ -12,6 +13,7 @@ const Login = ({ url }) => {
     name: "",
     email: "",
     password: "",
+    role: "admin",
   });
   const navigate = useNavigate();
 
@@ -21,6 +23,7 @@ const Login = ({ url }) => {
     setData((data) => ({ ...data, [name]: value }));
   };
 
+  /*
   const handleSubmit = (e) => {
     e.preventDefault();
     if (email === "admin@example.com" && password === "admin123") {
@@ -29,7 +32,7 @@ const Login = ({ url }) => {
     } else {
       alert("Invalid email or password");
     }
-  };
+  };*/
 
   const onLogin = async (event) => {
     event.preventDefault();
@@ -45,10 +48,23 @@ const Login = ({ url }) => {
 
     if (response.data.success) {
       localStorage.setItem("token", response.data.token);
+      localStorage.setItem("isAdmin", "true");
+      navigate("/list");
     } else {
       alert(response.data.message);
+      toast.error(response.data.message);
     }
   };
+
+  // 🧠 If already logged in, log out when visiting /login
+  useEffect(() => {
+    const isAdmin = localStorage.getItem("isAdmin");
+    if (isAdmin === "true") {
+      localStorage.removeItem("token");
+      localStorage.removeItem("isAdmin");
+      navigate("/", { replace: true });
+    }
+  }, []);
 
   return (
     <div className="login-container">
@@ -73,6 +89,7 @@ const Login = ({ url }) => {
           )}
           <div className="input-group">
             <input
+              name="email"
               type="email"
               placeholder="Email"
               value={data.email}
@@ -82,6 +99,7 @@ const Login = ({ url }) => {
           </div>
           <div className="input-group">
             <input
+              name="password"
               type="password"
               placeholder="Password"
               value={data.password}

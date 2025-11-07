@@ -14,7 +14,8 @@ import Login from "./pages/Login/Login.jsx";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute.jsx";
 
 const App = () => {
-  const url = "http://localhost:4000";
+  const url = import.meta.env.VITE_BE_URL;
+
   const location = useLocation();
 
   // Hide Navbar/Sidebar on login page
@@ -22,64 +23,67 @@ const App = () => {
 
   return (
     <div>
-      <ToastContainer />
-      {!hideLayout && <Navbar />}
-      {!hideLayout && <hr />}
-
-      {!hideLayout && localStorage.getItem("token") ? (
-        <div className="app-content">
-          <Sidebar />
-          <Routes>
-            <Route
-              path="/list"
-              element={
-                <ProtectedRoute>
-                  <List url={url} />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/add"
-              element={
-                <ProtectedRoute>
-                  <Add url={url} />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/category"
-              element={
-                <ProtectedRoute>
-                  <Category url={url} />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/offer"
-              element={
-                <ProtectedRoute>
-                  <Offer url={url} />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/offerList"
-              element={
-                <ProtectedRoute>
-                  <OfferList url={url} />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/orders"
-              element={
-                <ProtectedRoute>
-                  <Orders url={url} />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </div>
+      {!hideLayout &&
+      localStorage.getItem("token") &&
+      localStorage.getItem("isAdmin") ? (
+        <>
+          <ToastContainer />
+          <Navbar />
+          <hr />
+          <div className="app-content">
+            <Sidebar />
+            <Routes>
+              <Route
+                path="/list"
+                element={
+                  <ProtectedRoute>
+                    <List url={url} />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/add"
+                element={
+                  <ProtectedRoute>
+                    <Add url={url} />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/category"
+                element={
+                  <ProtectedRoute>
+                    <Category url={url} />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/offer"
+                element={
+                  <ProtectedRoute>
+                    <Offer url={url} />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/offerList"
+                element={
+                  <ProtectedRoute>
+                    <OfferList url={url} />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/orders"
+                element={
+                  <ProtectedRoute>
+                    <Orders url={url} />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </div>
+        </>
       ) : (
         <Routes>
           <Route path="/" element={<Login url={url} />} />

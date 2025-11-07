@@ -96,3 +96,19 @@
 .addon-label input {
   color: #676767;
 }
+
+.addon-category {
+  margin-bottom: 15px;
+}
+
+.addon-category h6 {
+  margin: 5px 0;
+  font-weight: 600;
+  color: #b03060;
+}
+
+.addon-label {
+  display: block;
+  margin-left: 10px;
+  margin-bottom: 5px;
+}
