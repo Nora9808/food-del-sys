@@ -12,7 +12,7 @@ import MyOrders from "./pages/MyOrders/MyOrders";
 const App = () => {
   const [showLogin, setShowLogin] = useState(false);
 
-  const url = "http://localhost:4000";
+  const url = import.meta.env.VITE_BE_URL;
 
   return (
     <>

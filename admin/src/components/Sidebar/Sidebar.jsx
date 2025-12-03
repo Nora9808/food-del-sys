@@ -7,6 +7,20 @@ const Sidebar = () => {
   return (
     <div className="sidebar">
       <div className="sidebar-options">
+        <NavLink to="/list" className="sidebar-option">
+          <img src={assets.order_icon} alt="" />
+          <p>Menu Items List</p>
+        </NavLink>
+      </div>
+
+      <div className="sidebar-options">
+        <NavLink to="/add" className="sidebar-option">
+          <img src={assets.add_icon} alt="" />
+          <p>Add Menu Item</p>
+        </NavLink>
+      </div>
+
+      <div className="sidebar-options">
         <NavLink to="/category" className="sidebar-option">
           <img src={assets.add_icon} alt="" />
           <p>Categories</p>
@@ -14,16 +28,9 @@ const Sidebar = () => {
       </div>
 
       <div className="sidebar-options">
-        <NavLink to="/add" className="sidebar-option">
+        <NavLink to="/offerList" className="sidebar-option">
           <img src={assets.add_icon} alt="" />
-          <p>Add Item</p>
-        </NavLink>
-      </div>
-
-      <div className="sidebar-options">
-        <NavLink to="/list" className="sidebar-option">
-          <img src={assets.order_icon} alt="" />
-          <p>Items List</p>
+          <p>Offers List</p>
         </NavLink>
       </div>
 
@@ -31,13 +38,6 @@ const Sidebar = () => {
         <NavLink to="/offer" className="sidebar-option">
           <img src={assets.add_icon} alt="" />
           <p>Add Offer</p>
-        </NavLink>
-      </div>
-
-      <div className="sidebar-options">
-        <NavLink to="/offerList" className="sidebar-option">
-          <img src={assets.add_icon} alt="" />
-          <p>Offers List</p>
         </NavLink>
       </div>
 

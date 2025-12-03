@@ -48,7 +48,7 @@ const List = ({ url }) => {
       <p>All Offers List</p>
 
       <div className="list-table">
-        <div className="list-table-format title">
+        <div className="offer-list-table-format title">
           <b>Offer Name</b>
           <b>Offer Type</b>
           <b>Offer Amount</b>
@@ -59,7 +59,7 @@ const List = ({ url }) => {
         </div>
         {list.map((item, index) => {
           return (
-            <div key={index} className="list-table-format">
+            <div key={index} className="offer-list-table-format">
               <p>{item.name}</p>
               <p>{item.discountType}</p>
               <p>

@@ -44,7 +44,7 @@
 .add-sub-item {
   border: none;
   color: white;
-  background-color: tomato;
+  background-color: #b03060;
   width: max(10vw, 150px);
   margin-top: 30px;
   padding: 10px 0px;
