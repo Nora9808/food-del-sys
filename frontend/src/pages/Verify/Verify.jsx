@@ -12,13 +12,6 @@ function Verify() {
   const navigate = useNavigate();
 
   const verifyPayment = async () => {
-    // Read token from localStorage (survives page reload)
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      console.error("No token found. Redirecting to login.");
-    }
-
     try {
       if (success === "true") {
         await axios.post(url + "/api/order/payment", {
@@ -31,17 +24,19 @@ function Verify() {
           orderId: orderId,
         });
 
+        let cartId = localStorage.getItem("cartId");
+
         // Remove all cart items
-        const res = await axios.post(
-          `${url}/api/cart/removeAll`,
-          {},
-          { headers: { token } }
-        );
+        const res = await axios.post(`${url}/api/cart/removeAll`, {
+          cartId: cartId,
+        });
 
         if (res.data.success) {
           setCartItems([]);
+          localStorage.removeItem("cartId");
         }
-        navigate("/myorders");
+
+        navigate("/");
       } else {
         await axios.post(url + "/api/order/payment", {
           paymentStatus: "cancelled",
@@ -56,7 +51,7 @@ function Verify() {
         navigate("/cart");
       }
     } catch (error) {
-      console.error("Error verifying payment:", err);
+      console.error("Error verifying payment:", error);
     }
   };
 

@@ -1,28 +1,29 @@
 import React, { useState } from "react";
 import "./Navbar.css";
 import { assets } from "../../assets/assets";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useContext } from "react";
 import { StoreContext } from "../../context/StoreContext";
 
-const Navbar = ({ setShowLogin }) => {
+const Navbar = () => {
   const [menu, setMenu] = useState("home");
 
-  const { getTotalCartAmount, token, setToken } = useContext(StoreContext);
+  const { getTotalCartAmount } = useContext(StoreContext);
   const { subtotal } = getTotalCartAmount();
 
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
+  /*
   const logout = () => {
     localStorage.removeItem("token");
     setToken("");
     navigate("/");
-  };
+  };*/
 
   return (
     <div className="navbar">
       <Link to="/">
-        <img src={assets.logo} alt="" className="log" />
+        <img src={assets.pizzaLogo} alt="" className="log" />
       </Link>
 
       <ul className="navbar-menu">
@@ -40,13 +41,14 @@ const Navbar = ({ setShowLogin }) => {
         >
           menu
         </a>
+        {/*
         <a
           href="#app-download"
           onClick={() => setMenu("mobile-app")}
           className={menu === "mobile-app" ? "active" : ""}
         >
           mobile-app
-        </a>
+        </a>*/}
         <a
           href="#footer"
           onClick={() => setMenu("contact-us")}
@@ -57,7 +59,7 @@ const Navbar = ({ setShowLogin }) => {
       </ul>
 
       <div className="navbar-right">
-        <img src={assets.search_icon} alt="" />
+        {/*<img src={assets.search_icon} alt="" />*/}
 
         <div className="navbar-search-icon">
           <Link to="/cart">
@@ -65,7 +67,7 @@ const Navbar = ({ setShowLogin }) => {
           </Link>
           <div className={subtotal === 0 ? "" : "dot"}></div>
         </div>
-        {!token ? (
+        {/*!token ? (
           <button onClick={() => setShowLogin(true)}>sign in</button>
         ) : (
           <div className="navbar-profile">
@@ -82,7 +84,7 @@ const Navbar = ({ setShowLogin }) => {
               </li>
             </ul>
           </div>
-        )}
+        )*/}
       </div>
     </div>
   );
