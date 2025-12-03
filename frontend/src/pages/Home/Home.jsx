@@ -15,7 +15,7 @@ const Home = ({ url }) => {
       <OffersBar url={url} />
       <ExploreMenu category={category} setCategory={setCategory} url={url} />
       <FoodDisplay category={category} />
-      <AppDownload />
+      {/*<AppDownload />*/}
     </div>
   );
 };

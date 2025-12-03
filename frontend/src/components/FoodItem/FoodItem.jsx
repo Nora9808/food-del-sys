@@ -1,8 +1,9 @@
 import React, { useContext } from "react";
 import "./FoodItem.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { assets } from "../../assets/assets";
 import { StoreContext } from "../../context/StoreContext";
+import axios from "axios";
 
 const FoodItem = ({ foodId, name, price, description, image, addons }) => {
   const { cartItems, addToCart, removeFromCart, url } =
@@ -10,6 +11,7 @@ const FoodItem = ({ foodId, name, price, description, image, addons }) => {
 
   const [showAddons, setShowAddons] = useState(false);
   const [selectedAddons, setSelectedAddons] = useState([]);
+  const [addonCategory, setAddonCategory] = useState([]);
 
   // Find if this food is already in cart
   const cartItem = cartItems.find((item) => item.food.foodId === foodId);
@@ -34,6 +36,23 @@ const FoodItem = ({ foodId, name, price, description, image, addons }) => {
     setShowAddons(false);
     setSelectedAddons([]);
   };
+
+  const findCategories = async () => {
+    const response = await axios.get(`${url}/api/category/list`);
+
+    if (response.data.success) {
+      const addonCategories = response.data.data.filter(
+        (entry) => entry.type === "addon"
+      );
+      setAddonCategory(addonCategories); // store categories in state
+    } else {
+      console.log("Error fetching categories");
+    }
+  };
+
+  useEffect(() => {
+    findCategories();
+  }, []);
 
   return (
     <div className="food-item">
@@ -71,7 +90,7 @@ const FoodItem = ({ foodId, name, price, description, image, addons }) => {
       <div className="food-item-info">
         <div className="food-item-name-rating">
           <p>{name}</p>
-          <img src={assets.rating_starts} alt="rating" />
+          {/*<img src={assets.rating_starts} alt="rating" />*/}
         </div>
         <p className="food-item-desc">{description}</p>
         <p className="food-item-price">${price}</p>
@@ -84,21 +103,32 @@ const FoodItem = ({ foodId, name, price, description, image, addons }) => {
               {addons.length === 0 ? (
                 <p>No addons available</p>
               ) : (
-                addons.map((addon) => (
-                  <React.Fragment key={addon.foodAddId}>
-                    <label className="addon-label">
-                      <input
-                        type="checkbox"
-                        checked={selectedAddons.some(
-                          (a) => a.id === addon.foodAddId
-                        )}
-                        onChange={() => toggleAddonSelection(addon)}
-                      />
-                      {addon.name} (+${addon.price})
-                    </label>
-                    <br />
-                  </React.Fragment>
-                ))
+                // Group addons by category
+                addonCategory.map((category) => {
+                  // Filter addons for this category
+                  const addonsForCategory = addons.filter(
+                    (addon) => addon.categoryId === category.categoryId
+                  );
+                  if (addonsForCategory.length === 0) return null; // skip empty categories
+
+                  return (
+                    <div key={category.categoryId} className="addon-category">
+                      <h6>{category.name}:</h6>
+                      {addonsForCategory.map((addon) => (
+                        <label className="addon-label" key={addon.foodAddId}>
+                          <input
+                            type="checkbox"
+                            checked={selectedAddons.some(
+                              (a) => a.id === addon.foodAddId
+                            )}
+                            onChange={() => toggleAddonSelection(addon)}
+                          />
+                          {addon.name} (+${addon.price})
+                        </label>
+                      ))}
+                    </div>
+                  );
+                })
               )}
               <div className="addons-modal-actions">
                 <button onClick={handleAddToCart}>Add to Cart</button>

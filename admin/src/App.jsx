@@ -1,35 +1,94 @@
 import React from "react";
-import Navbar from "./components/Navbar/Navbar";
-import Sidebar from "./components/Sidebar/Sidebar";
-import { Routes, Route } from "react-router-dom";
-import Add from "./pages/Add/Add";
-import List from "./pages/List/List";
-import Orders from "./pages/Orders/Orders";
-import Category from "./pages/Category/Category";
-import Offer from "./pages/Offer/Offer";
-import OfferList from "./pages/OfferList/OfferList";
+import Navbar from "./components/Navbar/Navbar.jsx";
+import Sidebar from "./components/Sidebar/Sidebar.jsx";
+import { Routes, Route, useLocation } from "react-router-dom";
+import Add from "./pages/Add/Add.jsx";
+import List from "./pages/List/List.jsx";
+import Orders from "./pages/Orders/Orders.jsx";
+import Category from "./pages/Category/Category.jsx";
+import Offer from "./pages/Offer/Offer.jsx";
+import OfferList from "./pages/OfferList/OfferList.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Login from "./pages/Login/Login.jsx";
+import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute.jsx";
 
 const App = () => {
-  const url = "http://localhost:4000";
+  const url = import.meta.env.VITE_BE_URL;
+
+  const location = useLocation();
+
+  // Hide Navbar/Sidebar on login page
+  const hideLayout = location.pathname === "/";
 
   return (
     <div>
-      <ToastContainer />
-      <Navbar />
-      <hr />
-      <div className="app-content">
-        <Sidebar />
+      {!hideLayout &&
+      localStorage.getItem("token") &&
+      localStorage.getItem("isAdmin") ? (
+        <>
+          <ToastContainer />
+          <Navbar />
+          <hr />
+          <div className="app-content">
+            <Sidebar />
+            <Routes>
+              <Route
+                path="/list"
+                element={
+                  <ProtectedRoute>
+                    <List url={url} />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/add"
+                element={
+                  <ProtectedRoute>
+                    <Add url={url} />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/category"
+                element={
+                  <ProtectedRoute>
+                    <Category url={url} />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/offer"
+                element={
+                  <ProtectedRoute>
+                    <Offer url={url} />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/offerList"
+                element={
+                  <ProtectedRoute>
+                    <OfferList url={url} />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/orders"
+                element={
+                  <ProtectedRoute>
+                    <Orders url={url} />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </div>
+        </>
+      ) : (
         <Routes>
-          <Route path="/category" element={<Category url={url} />} />
-          <Route path="/add" element={<Add url={url} />} />
-          <Route path="/offer" element={<Offer url={url} />} />
-          <Route path="/offerList" element={<OfferList url={url} />} />
-          <Route path="/list" element={<List url={url} />} />
-          <Route path="/orders" element={<Orders url={url} />} />
+          <Route path="/" element={<Login url={url} />} />
         </Routes>
-      </div>
+      )}
     </div>
   );
 };

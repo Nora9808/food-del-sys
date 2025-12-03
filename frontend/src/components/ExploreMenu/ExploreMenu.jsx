@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./ExploreMenu.css";
 import axios from "axios";
+import { assets } from "../../assets/assets";
 
 const ExploreMenu = ({ category, setCategory, url }) => {
   const [foodCategory, setFoodCategory] = useState([]);
@@ -40,15 +41,12 @@ const ExploreMenu = ({ category, setCategory, url }) => {
               key={index}
               className="explore-menu-list-item"
             >
-              {/**
               <img
-                className={category === item.menu_name ? "active" : ""}
-                src={item.menu_image}
+                className={category === item.name ? "active" : ""}
+                src={assets.pizzaCategory}
                 alt=""
-              /> */}
-              <p className={category === item.name ? "active" : ""}>
-                {item.name}
-              </p>
+              />
+              <p className="category-name">{item.name}</p>
             </div>
           );
         })}
